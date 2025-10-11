@@ -1,6 +1,7 @@
 import { useAuth } from "@/lib/auth-context";
 import { Navigate } from "react-router-dom";
 import { useState } from "react";
+import EnvBanner from "@/components/EnvBanner";
 
 export default function Login() {
   const { user, signInWithGoogle } = useAuth();
@@ -13,6 +14,9 @@ export default function Login() {
     console.log("[Login] Sign-in button clicked");
     try {
       await signInWithGoogle();
+    } catch (e) {
+      console.error("[Login] signInWithGoogle failed:", e);
+      alert("Sign-in failed. See console for details.");
     } finally {
       setBusy(false);
     }
@@ -28,9 +32,10 @@ export default function Login() {
           disabled={busy}
           className="px-4 py-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-60"
         >
-          {busy ? "Signing in\u2026" : "Continue with Google"}
+          {busy ? "Signing in..." : "Continue with Google"}
         </button>
       </div>
+      <EnvBanner />
     </main>
   );
 }
