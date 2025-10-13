@@ -7,7 +7,7 @@ import { addTodo, deleteTodo, subscribeToTodos, toggleTodo } from "@/lib/todos";
 import type { Todo } from "@/lib/todos";
 
 const inputClass =
-  "w-full rounded border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-200";
+  "flex-1 rounded border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-200";
 const buttonClass =
   "inline-flex items-center justify-center rounded bg-black px-3 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed";
 
@@ -76,17 +76,19 @@ export default function TodoCard() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <button className={buttonClass} type="submit">
-            Add
+          <button className={buttonClass} type="submit" disabled={!input.trim()}>
+            Add Task
           </button>
         </form>
 
         {loading ? (
-          <div className="text-sm text-neutral-500">Loading...</div>
+          <SkeletonList />
         ) : errMsg ? (
           <div className="text-sm text-red-600">{errMsg}</div>
         ) : todos.length === 0 ? (
-          <div className="text-sm text-neutral-500">No tasks yet.</div>
+          <div className="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-3 py-4 text-sm text-neutral-500">
+            No tasks yet. Add your first task to get started.
+          </div>
         ) : (
           <ul className="space-y-2">
             {todos.map((t) => (
@@ -118,5 +120,15 @@ export default function TodoCard() {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function SkeletonList() {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: 3 }).map((_, idx) => (
+        <div key={idx} className="h-10 rounded-lg bg-neutral-200/70 animate-pulse" />
+      ))}
+    </div>
   );
 }
