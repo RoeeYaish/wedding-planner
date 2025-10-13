@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState, FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
+import type { BudgetDoc, Expense } from "@/lib/budget";
 import {
-  BudgetDoc,
-  Expense,
   addExpense,
   deleteExpense,
   setBudgetLimit,
