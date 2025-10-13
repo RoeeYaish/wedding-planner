@@ -63,6 +63,8 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    direction: rtl;
+    background-color: #f7f7f8;
+    @apply text-foreground antialiased;
   }
 }
