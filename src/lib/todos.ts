@@ -24,19 +24,24 @@ function todosColRef(uid: string) {
 
 export function subscribeToTodos(
   uid: string,
-  cb: (todos: Todo[]) => void
+  cb: (todos: Todo[]) => void,
+  onError?: (e: unknown) => void
 ): () => void {
   const q = query(todosColRef(uid), orderBy("createdAt", "asc"));
-  return onSnapshot(q, (snap) => {
-    const items: Todo[] = [];
-    snap.forEach((d) =>
-      items.push({
-        id: d.id,
-        ...(d.data() as Omit<Todo, "id">),
-      })
-    );
-    cb(items);
-  });
+  return onSnapshot(
+    q,
+    (snap) => {
+      const items: Todo[] = [];
+      snap.forEach((d) =>
+        items.push({
+          id: d.id,
+          ...(d.data() as Omit<Todo, "id">),
+        })
+      );
+      cb(items);
+    },
+    (err) => onError?.(err)
+  );
 }
 
 export async function addTodo(uid: string, text: string) {

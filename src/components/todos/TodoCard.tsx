@@ -9,13 +9,23 @@ export default function TodoCard() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
+  const [errMsg, setErrMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
-    const unsub = subscribeToTodos(user.uid, (items) => {
-      setTodos(items);
-      setLoading(false);
-    });
+    const unsub = subscribeToTodos(
+      user.uid,
+      (items) => {
+        setTodos(items);
+        setLoading(false);
+        setErrMsg(null);
+      },
+      (e) => {
+        console.error("Todos subscription error:", e);
+        setErrMsg("Permission error. Please check Firestore rules.");
+        setLoading(false);
+      }
+    );
     return () => unsub();
   }, [user]);
 
@@ -56,6 +66,8 @@ export default function TodoCard() {
 
       {loading ? (
         <div className="text-sm text-neutral-500">Loading...</div>
+      ) : errMsg ? (
+        <div className="text-sm text-red-600">{errMsg}</div>
       ) : todos.length === 0 ? (
         <div className="text-sm text-neutral-500">No tasks yet.</div>
       ) : (
