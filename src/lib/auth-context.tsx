@@ -20,27 +20,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    // Subscribe to auth state and then to the user's profile doc.
+    let unsubscribeProfile: (() => void) | null = null;
+
     const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       setLoading(false);
 
-      // Clean previous profile sub
+      // clear previous profile listener
+      if (unsubscribeProfile) {
+        unsubscribeProfile();
+        unsubscribeProfile = null;
+      }
       setProfile(null);
 
       if (u) {
         try {
           await ensureUserDoc(u);
-          const unsubscribeProfile = subscribeToUserProfile(u.uid, setProfile);
-          // Return a cleanup for this branch
-          return () => unsubscribeProfile();
+          unsubscribeProfile = subscribeToUserProfile(u.uid, setProfile);
         } catch (e) {
           console.error("[Auth] ensureUserDoc failed:", e);
         }
       }
     });
 
-    return () => unsubscribeAuth();
+    return () => {
+      if (unsubscribeProfile) unsubscribeProfile();
+      unsubscribeAuth();
+    };
   }, []);
 
   const signInWithGoogle = async () => {
