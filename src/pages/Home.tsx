@@ -6,6 +6,7 @@ import BudgetCard from "@/components/budget/BudgetCard";
 import GuestListCard from "@/components/guests/GuestListCard";
 import NextStepsCard from "@/components/next-steps/NextStepsCard";
 import TodoCard from "@/components/todos/TodoCard";
+import TimelineCard from "@/components/timeline/TimelineCard";
 import VendorManagementCard from "@/components/vendors/VendorManagementCard";
 
 export default function Home() {
@@ -81,11 +82,8 @@ export default function Home() {
           {/* Vendor Management */}
           <VendorManagementCard />
 
-          {/* Timeline (optional placeholder) */}
-          <Card>
-            <CardHeader title="Wedding Day Timeline" subtitle="Coming soon" />
-            <div className="text-sm text-neutral-500">Placeholder content.</div>
-          </Card>
+          {/* Timeline */}
+          <TimelineCard />
         </div>
       </div>
     </main>
