@@ -1,13 +1,15 @@
-import { useAuth } from "@/lib/auth-context";
-import { Navigate } from "react-router-dom";
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/lib/auth-context";
 import EnvBanner from "@/components/EnvBanner";
 
 export default function Login() {
-  const { user, signInWithGoogle } = useAuth();
+  const { user, loading, signInWithGoogle } = useAuth();
   const [busy, setBusy] = useState(false);
 
-  if (user) return <Navigate to="/" replace />;
+  if (!loading && user) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleClick = async () => {
     setBusy(true);
