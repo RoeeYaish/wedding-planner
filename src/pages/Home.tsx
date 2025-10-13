@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import Countdown from "@/components/Countdown";
 import { Card, CardHeader } from "@/components/ui/Card";
+import BudgetCard from "@/components/budget/BudgetCard";
 import NextStepsCard from "@/components/next-steps/NextStepsCard";
 import TodoCard from "@/components/todos/TodoCard";
 
@@ -70,10 +71,7 @@ export default function Home() {
           <TodoCard />
 
           {/* Budget Tracker */}
-          <Card>
-            <CardHeader title="Budget Tracker" subtitle="Monitor expenses" />
-            <div className="text-sm text-neutral-500">Placeholder content.</div>
-          </Card>
+          <BudgetCard />
 
           {/* Guest List */}
           <Card>
