@@ -1,7 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Card, CardHeader } from "@/components/ui/Card";
-import { Todo, addTodo, deleteTodo, subscribeToTodos, toggleTodo } from "@/lib/todos";
+import { addTodo, deleteTodo, subscribeToTodos, toggleTodo } from "@/lib/todos";
+import type { Todo } from "@/lib/todos";
 
 export default function TodoCard() {
   const { user } = useAuth();
