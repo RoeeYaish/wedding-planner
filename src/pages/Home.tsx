@@ -32,7 +32,7 @@ export default function Home() {
               onClick={logout}
               className="px-3 py-2 rounded border border-neutral-300 bg-white text-sm hover:bg-neutral-100 transition"
             >
-              התנתקות
+              Logout
             </button>
           </header>
 
