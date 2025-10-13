@@ -25,7 +25,7 @@ export type Expense = {
 };
 
 export function budgetDocRef(uid: string) {
-  return doc(db, "users", uid, "budget");
+  return doc(db, "users", uid, "budget", "summary");
 }
 
 export function expensesColRef(uid: string) {
