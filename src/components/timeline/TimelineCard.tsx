@@ -7,12 +7,13 @@ import {
   updateTimelineEvent,
   type TimelineEvent,
 } from "@/lib/timeline";
-import { Card, CardHeader, CardContent } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
+import SectionHeader from "@/components/ui/section-header";
 
 type Draft = {
   title: string;
   time: string;
-  durationMinutes?: number | null;
+  durationMinutes?: string | null;
   location?: string | null;
   contact?: string | null;
   notes?: string | null;
@@ -27,14 +28,12 @@ const emptyDraft: Draft = {
   notes: null,
 };
 
-function FieldRow({ label, children }: React.PropsWithChildren<{ label: string }>) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm text-neutral-600">{label}</label>
-      {children}
-    </div>
-  );
-}
+const inputClass =
+  "w-full rounded border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-200";
+const outlineButton =
+  "inline-flex items-center justify-center rounded border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100";
+const primaryButton =
+  "inline-flex items-center justify-center rounded bg-black px-3 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed";
 
 export default function TimelineCard() {
   const { user } = useAuth();
@@ -77,7 +76,7 @@ export default function TimelineCard() {
     setEditDraft({
       title: event.title ?? "",
       time: event.time ?? "",
-      durationMinutes: event.durationMinutes ?? null,
+      durationMinutes: event.durationMinutes != null ? String(event.durationMinutes) : null,
       location: event.location ?? null,
       contact: event.contact ?? null,
       notes: event.notes ?? null,
@@ -121,142 +120,99 @@ export default function TimelineCard() {
 
   return (
     <Card dir="rtl">
-      <CardHeader title="Wedding Day Timeline" subtitle="Schedule your big day" />
-      <CardContent>
-        <div className="border rounded-lg p-3 mb-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <FieldRow label="כותרת (חובה)">
-              <input
-                className="border rounded px-3 py-2"
-                placeholder="איפור, יציאה לצילומים, חופה…"
-                value={draft.title}
-                onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
-              />
-            </FieldRow>
-            <FieldRow label="שעה (HH:mm)">
-              <input
-                className="border rounded px-3 py-2"
-                placeholder="14:30"
-                value={draft.time}
-                onChange={(e) => setDraft((d) => ({ ...d, time: e.target.value }))}
-              />
-            </FieldRow>
-            <FieldRow label="משך (דקות)">
-              <input
-                className="border rounded px-3 py-2"
-                placeholder="לדוגמה: 45"
-                inputMode="numeric"
-                value={draft.durationMinutes ?? ""}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, durationMinutes: e.target.value as unknown as number }))
-                }
-              />
-            </FieldRow>
-            <FieldRow label="מיקום">
-              <input
-                className="border rounded px-3 py-2"
-                value={draft.location ?? ""}
-                onChange={(e) => setDraft((d) => ({ ...d, location: e.target.value }))}
-              />
-            </FieldRow>
-            <FieldRow label="איש קשר">
-              <input
-                className="border rounded px-3 py-2"
-                value={draft.contact ?? ""}
-                onChange={(e) => setDraft((d) => ({ ...d, contact: e.target.value }))}
-              />
-            </FieldRow>
-            <FieldRow label="הערות">
-              <input
-                className="border rounded px-3 py-2"
-                value={draft.notes ?? ""}
-                onChange={(e) => setDraft((d) => ({ ...d, notes: e.target.value }))}
-              />
-            </FieldRow>
-          </div>
+      <CardContent className="space-y-4">
+        <SectionHeader title="Wedding Day Timeline" subtitle="Schedule your big day" />
 
-          <div className="mt-3">
-            <button
-              className="px-4 py-2 rounded bg-black text-white disabled:opacity-50"
-              disabled={!canAdd || saving}
-              onClick={onAdd}
-            >
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <FieldInput
+              label="כותרת (חובה)"
+              value={draft.title}
+              onChange={(value) => setDraft((d) => ({ ...d, title: value }))}
+              required
+            />
+            <FieldInput
+              label="שעה (HH:mm)"
+              value={draft.time}
+              onChange={(value) => setDraft((d) => ({ ...d, time: value }))}
+              placeholder="14:30"
+            />
+            <FieldInput
+              label="משך (דקות)"
+              value={draft.durationMinutes ?? ""}
+              onChange={(value) => setDraft((d) => ({ ...d, durationMinutes: value }))}
+              inputMode="numeric"
+            />
+            <FieldInput
+              label="מיקום"
+              value={draft.location ?? ""}
+              onChange={(value) => setDraft((d) => ({ ...d, location: value }))}
+            />
+            <FieldInput
+              label="איש קשר"
+              value={draft.contact ?? ""}
+              onChange={(value) => setDraft((d) => ({ ...d, contact: value }))}
+            />
+            <FieldInput
+              label="הערות"
+              value={draft.notes ?? ""}
+              onChange={(value) => setDraft((d) => ({ ...d, notes: value }))}
+            />
+          </div>
+          <div className="mt-3 flex justify-end">
+            <button className={primaryButton} onClick={onAdd} disabled={!canAdd || saving}>
               הוסף אירוע
             </button>
           </div>
         </div>
 
-        <div className="flex flex-col gap-3">
-          {items.length === 0 ? (
-            <div className="text-neutral-500">אין אירועים עדיין.</div>
-          ) : (
-            items.map((event) =>
+        {items.length === 0 ? (
+          <div className="text-sm text-neutral-500">אין אירועים עדיין.</div>
+        ) : (
+          <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+            {items.map((event) =>
               editingId === event.id ? (
-                <div key={event.id} className="border rounded-lg p-3">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <FieldRow label="כותרת (חובה)">
-                      <input
-                        className="border rounded px-3 py-2"
-                        value={editDraft.title}
-                        onChange={(e) =>
-                          setEditDraft((d) => ({ ...d, title: e.target.value }))
-                        }
-                      />
-                    </FieldRow>
-                    <FieldRow label="שעה (HH:mm)">
-                      <input
-                        className="border rounded px-3 py-2"
-                        value={editDraft.time ?? ""}
-                        onChange={(e) =>
-                          setEditDraft((d) => ({ ...d, time: e.target.value }))
-                        }
-                      />
-                    </FieldRow>
-                    <FieldRow label="משך (דקות)">
-                      <input
-                        className="border rounded px-3 py-2"
-                        inputMode="numeric"
-                        value={editDraft.durationMinutes ?? ""}
-                        onChange={(e) =>
-                          setEditDraft((d) => ({
-                            ...d,
-                            durationMinutes: e.target.value as unknown as number,
-                          }))
-                        }
-                      />
-                    </FieldRow>
-                    <FieldRow label="מיקום">
-                      <input
-                        className="border rounded px-3 py-2"
-                        value={editDraft.location ?? ""}
-                        onChange={(e) =>
-                          setEditDraft((d) => ({ ...d, location: e.target.value }))
-                        }
-                      />
-                    </FieldRow>
-                    <FieldRow label="איש קשר">
-                      <input
-                        className="border rounded px-3 py-2"
-                        value={editDraft.contact ?? ""}
-                        onChange={(e) =>
-                          setEditDraft((d) => ({ ...d, contact: e.target.value }))
-                        }
-                      />
-                    </FieldRow>
-                    <FieldRow label="הערות">
-                      <input
-                        className="border rounded px-3 py-2"
-                        value={editDraft.notes ?? ""}
-                        onChange={(e) =>
-                          setEditDraft((d) => ({ ...d, notes: e.target.value }))
-                        }
-                      />
-                    </FieldRow>
+                <div
+                  key={event.id}
+                  className="rounded-lg border border-neutral-200 bg-white p-3 shadow-sm"
+                >
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                    <FieldInput
+                      label="כותרת (חובה)"
+                      value={editDraft.title}
+                      onChange={(value) => setEditDraft((d) => ({ ...d, title: value }))}
+                      required
+                    />
+                    <FieldInput
+                      label="שעה (HH:mm)"
+                      value={editDraft.time ?? ""}
+                      onChange={(value) => setEditDraft((d) => ({ ...d, time: value }))}
+                    />
+                    <FieldInput
+                      label="משך (דקות)"
+                      value={editDraft.durationMinutes ?? ""}
+                      onChange={(value) => setEditDraft((d) => ({ ...d, durationMinutes: value }))}
+                      inputMode="numeric"
+                    />
+                    <FieldInput
+                      label="מיקום"
+                      value={editDraft.location ?? ""}
+                      onChange={(value) => setEditDraft((d) => ({ ...d, location: value }))}
+                    />
+                    <FieldInput
+                      label="איש קשר"
+                      value={editDraft.contact ?? ""}
+                      onChange={(value) => setEditDraft((d) => ({ ...d, contact: value }))}
+                    />
+                    <FieldInput
+                      label="הערות"
+                      value={editDraft.notes ?? ""}
+                      onChange={(value) => setEditDraft((d) => ({ ...d, notes: value }))}
+                    />
                   </div>
-
                   <div className="mt-3 flex gap-2">
                     <button
-                      className="px-3 py-2 rounded bg-black text-white disabled:opacity-50"
+                      className={primaryButton}
                       onClick={saveEdit}
                       disabled={
                         saving ||
@@ -266,34 +222,35 @@ export default function TimelineCard() {
                     >
                       שמור
                     </button>
-                    <button className="px-3 py-2 rounded border" onClick={cancelEdit}>
+                    <button className={outlineButton} onClick={cancelEdit}>
                       ביטול
                     </button>
                   </div>
                 </div>
               ) : (
-                <div key={event.id} className="border rounded-lg p-3">
-                  <div className="flex flex-col gap-1">
-                    <div className="font-semibold">
-                      {event.time} • {event.title}
-                    </div>
-                    <div className="text-sm text-neutral-700">
-                      {event.durationMinutes != null && (
-                        <span>משך: {event.durationMinutes} דק' · </span>
-                      )}
-                      {event.location && <span>מיקום: {event.location} · </span>}
-                      {event.contact && <span>איש קשר: {event.contact}</span>}
-                    </div>
-                    {event.notes && (
-                      <div className="text-sm text-neutral-600">הערות: {event.notes}</div>
-                    )}
+                <div
+                  key={event.id}
+                  className="space-y-2 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm"
+                >
+                  <div className="text-base font-semibold text-neutral-900">
+                    {event.time} · {event.title}
                   </div>
-                  <div className="mt-3 flex gap-2">
-                    <button className="px-3 py-2 rounded border" onClick={() => startEdit(event)}>
+                  <div className="text-sm text-neutral-600">
+                    {event.durationMinutes != null ? `משך: ${event.durationMinutes} דק'` : ""}
+                    {event.durationMinutes != null && event.location ? " · " : ""}
+                    {event.location ? `מיקום: ${event.location}` : ""}
+                    {event.location && event.contact ? " · " : ""}
+                    {event.contact ? `איש קשר: ${event.contact}` : ""}
+                  </div>
+                  {event.notes ? (
+                    <div className="text-sm text-neutral-500">הערות: {event.notes}</div>
+                  ) : null}
+                  <div className="mt-2 flex gap-2 text-sm">
+                    <button className={outlineButton} onClick={() => startEdit(event)}>
                       ערוך
                     </button>
                     <button
-                      className="px-3 py-2 rounded border text-red-600"
+                      className={`${outlineButton} border-red-200 text-red-600 hover:bg-red-50`}
                       onClick={() => onDelete(event.id)}
                     >
                       מחק
@@ -301,9 +258,9 @@ export default function TimelineCard() {
                   </div>
                 </div>
               )
-            )
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -311,12 +268,42 @@ export default function TimelineCard() {
 
 function normalizeStr(value?: string | null) {
   if (value == null) return null;
-  const trimmed = String(value).trim();
+  const trimmed = value.trim();
   return trimmed === "" ? null : trimmed;
 }
 
-function toNumberOrNull(value?: unknown) {
-  if (value == null || String(value).trim() === "") return null;
-  const parsed = Number(String(value).replace(/[^\d.]/g, ""));
+function toNumberOrNull(value?: string | null) {
+  if (value == null || value.trim() === "") return null;
+  const parsed = Number(value.replace(/[^\d.]/g, ""));
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function FieldInput({
+  label,
+  value,
+  onChange,
+  inputMode,
+  required,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  required?: boolean;
+  placeholder?: string;
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-xs text-neutral-500">{label}</label>
+      <input
+        className={inputClass}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        inputMode={inputMode}
+        required={required}
+        placeholder={placeholder}
+      />
+    </div>
+  );
 }
