@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
-import { Card, CardHeader } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
+import SectionHeader from "@/components/ui/section-header";
 
 type Step = {
   id: string;
@@ -47,36 +48,38 @@ export default function NextStepsCard() {
 
   return (
     <Card>
-      <CardHeader
-        title="Next Steps"
-        subtitle="Helpful tasks to get you started"
-      />
-      <ul className="space-y-3">
-        {steps.map((s) => (
-          <li
-            key={s.id}
-            className="flex items-start justify-between gap-3 border rounded px-3 py-2"
-          >
-            <div>
-              <div className="flex items-center gap-2">
-                <StatusBadge status={s.status} />
-                <span className="font-medium">{s.title}</span>
+      <CardContent className="space-y-4">
+        <SectionHeader
+          title="Next Steps"
+          subtitle="Helpful tasks to get you started"
+        />
+        <ul className="space-y-3">
+          {steps.map((s) => (
+            <li
+              key={s.id}
+              className="flex items-start justify-between gap-3 rounded border border-neutral-200 px-3 py-2"
+            >
+              <div>
+                <div className="flex items-center gap-2">
+                  <StatusBadge status={s.status} />
+                  <span className="font-medium text-neutral-900">{s.title}</span>
+                </div>
+                {s.note ? (
+                  <div className="mt-1 text-xs text-neutral-500">{s.note}</div>
+                ) : null}
               </div>
-              {s.note ? (
-                <div className="text-xs text-neutral-500 mt-1">{s.note}</div>
+              {s.action ? (
+                <Link
+                  to={s.action.to}
+                  className="inline-flex items-center justify-center rounded border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-700 transition hover:bg-neutral-100"
+                >
+                  {s.action.label}
+                </Link>
               ) : null}
-            </div>
-            {s.action ? (
-              <Link
-                to={s.action.to}
-                className="text-sm px-3 py-1.5 rounded border bg-neutral-50 hover:bg-neutral-100"
-              >
-                {s.action.label}
-              </Link>
-            ) : null}
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
     </Card>
   );
 }

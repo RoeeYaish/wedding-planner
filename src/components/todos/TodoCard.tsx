@@ -1,9 +1,15 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
-import { Card, CardHeader } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
+import SectionHeader from "@/components/ui/section-header";
 import { addTodo, deleteTodo, subscribeToTodos, toggleTodo } from "@/lib/todos";
 import type { Todo } from "@/lib/todos";
+
+const inputClass =
+  "w-full rounded border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-200";
+const buttonClass =
+  "inline-flex items-center justify-center rounded bg-black px-3 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed";
 
 export default function TodoCard() {
   const { user } = useAuth();
@@ -60,20 +66,17 @@ export default function TodoCard() {
 
   return (
     <Card>
-      <div id="todos">
-        <CardHeader title="To-Do List" subtitle="Track your tasks" />
-        <form onSubmit={onAdd} className="flex gap-2 mb-3">
+      <CardContent className="space-y-4" id="todos">
+        <SectionHeader title="To-Do List" subtitle="Track your tasks" />
+        <form onSubmit={onAdd} className="flex flex-col gap-2 sm:flex-row">
           <input
             ref={inputRef}
-            className="flex-1 border rounded px-3 py-2"
+            className={inputClass}
             placeholder="Add a task..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <button
-            className="px-3 py-2 bg-neutral-900 text-white rounded hover:bg-neutral-800"
-            type="submit"
-          >
+          <button className={buttonClass} type="submit">
             Add
           </button>
         </form>
@@ -89,11 +92,12 @@ export default function TodoCard() {
             {todos.map((t) => (
               <li
                 key={t.id}
-                className="flex items-center justify-between border rounded px-3 py-2"
+                className="flex items-center justify-between rounded border border-neutral-200 px-3 py-2"
               >
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
+                    className="h-4 w-4 accent-black"
                     checked={t.completed}
                     onChange={() => onToggle(t)}
                   />
@@ -102,7 +106,8 @@ export default function TodoCard() {
                   </span>
                 </label>
                 <button
-                  className="text-sm text-red-600 hover:underline"
+                  type="button"
+                  className="text-sm text-red-600 hover:text-red-700"
                   onClick={() => onDelete(t)}
                 >
                   Delete
@@ -111,7 +116,7 @@ export default function TodoCard() {
             ))}
           </ul>
         )}
-      </div>
+      </CardContent>
     </Card>
   );
 }
