@@ -3,8 +3,10 @@ import { useAuth } from "@/lib/auth-context";
 import Countdown from "@/components/Countdown";
 import { Card, CardHeader } from "@/components/ui/Card";
 import BudgetCard from "@/components/budget/BudgetCard";
+import GuestListCard from "@/components/guests/GuestListCard";
 import NextStepsCard from "@/components/next-steps/NextStepsCard";
 import TodoCard from "@/components/todos/TodoCard";
+import VendorManagementCard from "@/components/vendors/VendorManagementCard";
 
 export default function Home() {
   const { user, profile, logout } = useAuth();
@@ -74,16 +76,10 @@ export default function Home() {
           <BudgetCard />
 
           {/* Guest List */}
-          <Card>
-            <CardHeader title="Guest List" subtitle="Manage invites & RSVPs" />
-            <div className="text-sm text-neutral-500">Placeholder content.</div>
-          </Card>
+          <GuestListCard />
 
           {/* Vendor Management */}
-          <Card>
-            <CardHeader title="Vendor Management" subtitle="Track your vendors" />
-            <div className="text-sm text-neutral-500">Placeholder content.</div>
-          </Card>
+          <VendorManagementCard />
 
           {/* Timeline (optional placeholder) */}
           <Card>
