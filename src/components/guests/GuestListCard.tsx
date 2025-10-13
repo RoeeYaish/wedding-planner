@@ -10,8 +10,16 @@ import type { Guest } from "@/lib/guests";
 function mapHebrewStatusToRsvp(s?: string): "pending" | "accepted" | "declined" {
   if (!s) return "pending";
   const v = String(s).trim();
-  const yes = ["מאושר", "מאשרים", "אישרו", "כן", "מגיע", "מאשר", "Confirmed"];
-  const no = ["לא", "לא מגיע", "סירב", "Declined"];
+  const yes = [
+    "\u05de\u05d0\u05d5\u05e9\u05e8",
+    "\u05de\u05d0\u05e9\u05e8\u05d9\u05dd",
+    "\u05d0\u05d9\u05e9\u05e8\u05d5",
+    "\u05db\u05df",
+    "\u05de\u05d2\u05d9\u05e2",
+    "\u05de\u05d0\u05e9\u05e8",
+    "Confirmed",
+  ];
+  const no = ["\u05dc\u05d0", "\u05dc\u05d0 \u05de\u05d2\u05d9\u05e2", "\u05e1\u05d9\u05e8\u05d1", "Declined"];
   if (yes.some((k) => v.includes(k))) return "accepted";
   if (no.some((k) => v.includes(k))) return "declined";
   return "pending";
@@ -30,15 +38,34 @@ async function readSheetFile(file: File): Promise<Record<string, any>[]> {
 }
 
 function downloadGuestsTemplate() {
-  const headers = ["שם", "קטגוריה", "מספר מוזמנים", "מספר טלפון", "סטטוס", "הערות"];
-  const sample = [["ישראל ישראלי", "משפחה", "2", "050-1234567", "מאושר", "דוגמה"]];
+  const headers = [
+    "\u05e9\u05dd",
+    "\u05e7\u05d8\u05d2\u05d5\u05e8\u05d9\u05d4",
+    "\u05de\u05e1\u05e4\u05e8 \u05de\u05d5\u05d6\u05de\u05e0\u05d9\u05dd",
+    "\u05de\u05e1\u05e4\u05e8 \u05d8\u05dc\u05e4\u05d5\u05df",
+    "\u05e1\u05d8\u05d8\u05d5\u05e1",
+    "\u05d4\u05e2\u05e8\u05d5\u05ea",
+  ];
+  const sample = [
+    ["\u05d9\u05e9\u05e8\u05d0\u05dc \u05d9\u05e9\u05e8\u05d0\u05dc\u05d9", "\u05de\u05e9\u05e4\u05d7\u05d4", "2", "050-1234567", "\u05de\u05d0\u05d5\u05e9\u05e8", "\u05d3\u05d5\u05d2\u05de\u05d4"],
+  ];
 
   const ws = XLSX.utils.aoa_to_sheet([headers, ...sample]);
   (ws as any)["!rtl"] = true;
 
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "מוזמנים");
+  XLSX.utils.book_append_sheet(wb, ws, "\u05de\u05d5\u05d6\u05de\u05e0\u05d9\u05dd");
   XLSX.writeFile(wb, "wedding-guests-template.xlsx");
+}
+
+function sanitizeForFirestore<T extends Record<string, any>>(obj: T): T {
+  const cleaned: Record<string, any> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === undefined) continue;
+    if (typeof v === "string" && v.trim() === "") continue;
+    cleaned[k] = v;
+  }
+  return cleaned as T;
 }
 
 type GuestImport = {
@@ -50,20 +77,19 @@ type GuestImport = {
   notes?: string;
   invited: boolean;
   rsvpStatus: "pending" | "accepted" | "declined";
-  email?: string;
 };
 
 function rowsToGuests(rows: Record<string, any>[]) {
   const out: GuestImport[] = [];
   for (const r of rows) {
-    const name = String(r["שם"] ?? "").trim();
+    const name = String(r["\u05e9\u05dd"] ?? "").trim();
     if (!name) continue;
 
-    const category = String(r["קטגוריה"] ?? "").trim();
-    const seats = normalizeSeats(r["מספר מוזמנים"]);
-    const phone = String(r["מספר טלפון"] ?? "").trim();
-    const statusRaw = String(r["סטטוס"] ?? "").trim();
-    const notes = String(r["הערות"] ?? "").trim();
+    const category = String(r["\u05e7\u05d8\u05d2\u05d5\u05e8\u05d9\u05d4"] ?? "").trim();
+    const seats = normalizeSeats(r["\u05de\u05e1\u05e4\u05e8 \u05de\u05d5\u05d6\u05de\u05e0\u05d9\u05dd"]);
+    const phone = String(r["\u05de\u05e1\u05e4\u05e8 \u05d8\u05dc\u05e4\u05d5\u05df"] ?? "").trim();
+    const statusRaw = String(r["\u05e1\u05d8\u05d8\u05d5\u05e1"] ?? "").trim();
+    const notes = String(r["\u05d4\u05e2\u05e8\u05d5\u05ea"] ?? "").trim();
     const rsvpStatus = mapHebrewStatusToRsvp(statusRaw);
 
     out.push({
@@ -75,7 +101,6 @@ function rowsToGuests(rows: Record<string, any>[]) {
       notes: notes || undefined,
       invited: rsvpStatus !== "pending",
       rsvpStatus,
-      email: undefined,
     });
   }
   return out;
@@ -105,13 +130,14 @@ async function importGuestsBatch(uid: string, guests: GuestImport[], mode: "appe
   let count = 0;
   for (const g of guests) {
     const ref = doc(collection(db, "users", uid, "guests"));
-    batch.set(ref, {
+    const payload = sanitizeForFirestore({
       ...g,
       seats: g.seats ?? 1,
       invited: g.invited ?? false,
       rsvpStatus: g.rsvpStatus ?? "pending",
       createdAt: serverTimestamp(),
     });
+    batch.set(ref, payload);
     count++;
     if (count % 450 === 0) {
       await batch.commit();
