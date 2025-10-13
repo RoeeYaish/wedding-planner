@@ -5,6 +5,7 @@ import {
   setDoc,
   serverTimestamp,
   onSnapshot,
+  updateDoc,
 } from "firebase/firestore";
 import type { User } from "firebase/auth";
 
@@ -14,6 +15,9 @@ export type UserProfile = {
   displayName: string | null;
   photoURL: string | null;
   createdAt?: any; // Firestore timestamp
+  // New optional fields
+  weddingDate?: string | null; // ISO yyyy-mm-dd (from <input type="date">)
+  weddingLocation?: string | null;
 };
 
 export async function ensureUserDoc(user: User) {
@@ -40,4 +44,12 @@ export function subscribeToUserProfile(
   return onSnapshot(ref, (snap) => {
     cb(snap.exists() ? (snap.data() as UserProfile) : null);
   });
+}
+
+export async function updateUserProfile(
+  uid: string,
+  data: Partial<Pick<UserProfile, "displayName" | "weddingDate" | "weddingLocation">>
+) {
+  const ref = doc(db, "users", uid);
+  await updateDoc(ref, data);
 }

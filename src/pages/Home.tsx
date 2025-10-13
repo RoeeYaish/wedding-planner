@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 
 export default function Home() {
@@ -30,12 +31,20 @@ export default function Home() {
           </div>
         </div>
 
-        <button
-          onClick={logout}
-          className="px-3 py-2 bg-neutral-800 text-white rounded hover:bg-neutral-700"
-        >
-          Logout
-        </button>
+        <div className="space-x-3">
+          <Link
+            to="/profile"
+            className="inline-block px-3 py-2 border rounded hover:bg-neutral-50"
+          >
+            My Profile
+          </Link>
+          <button
+            onClick={logout}
+            className="px-3 py-2 bg-neutral-800 text-white rounded hover:bg-neutral-700"
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </main>
   );
