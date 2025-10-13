@@ -45,13 +45,21 @@ function downloadGuestsTemplate() {
     "\u05de\u05e1\u05e4\u05e8 \u05d8\u05dc\u05e4\u05d5\u05df",
     "\u05e1\u05d8\u05d8\u05d5\u05e1",
     "\u05d4\u05e2\u05e8\u05d5\u05ea",
-  ];
-  const sample = [
-    ["\u05d9\u05e9\u05e8\u05d0\u05dc \u05d9\u05e9\u05e8\u05d0\u05dc\u05d9", "\u05de\u05e9\u05e4\u05d7\u05d4", "2", "050-1234567", "\u05de\u05d0\u05d5\u05e9\u05e8", "\u05d3\u05d5\u05d2\u05de\u05d4"],
+    "\u05d4\u05e0\u05d7\u05d9\u05d5\u05ea",
   ];
 
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...sample]);
+  const instructionText =
+    "\u05d7\u05e9\u05d5\u05d1: \u05e9\u05d3\u05d4 ' \u05e9\u05dd ' \u05d4\u05d5\u05d0 \u05d4\u05e9\u05d3\u05d4 \u05d4\u05d9\u05d7\u05d9\u05d3 \u05e9\u05d7\u05d5\u05d1\u05d4 \u05dc\u05de\u05dc\u05d0. \u05e9\u05d0\u05e8 \u05d4\u05e2\u05de\u05d5\u05d3\u05d5\u05ea \u05d0\u05d9\u05e0\u05df \u05d7\u05d5\u05d1\u05d4 \u05d5\u05d9\u05db\u05d5\u05dc\u05d5\u05ea \u05dc\u05d4\u05d9\u05e9\u05d0\u05e8 \u05e8\u05d9\u05e7\u05d5\u05ea. " +
+    "\u05d9\u05e9 \u05dc\u05d4\u05e2\u05dc\u05d5\u05ea \u05d0\u05ea \u05d4\u05e7\u05d5\u05d1\u05e5 \u05d1\u05d3\u05d9\u05d5\u05e7 \u05e2\u05dd \u05db\u05d5\u05ea\u05e8\u05d5\u05ea \u05d4\u05e2\u05de\u05d5\u05d3\u05d5\u05ea \u05db\u05e4\u05d9 \u05e9\u05d4\u05df \u05de\u05d5\u05e4\u05d9\u05e2\u05d5\u05ea \u05db\u05d0\u05df, \u05dc\u05dc\u05d0 \u05d4\u05d5\u05e1\u05e4\u05ea \u05e2\u05de\u05d5\u05d3\u05d5\u05ea \u05e0\u05d5\u05e1\u05e4\u05d5\u05ea \u05d0\u05d5 \u05e9\u05d9\u05e0\u05d5\u05d9 \u05e9\u05de\u05d5\u05ea \u05e2\u05de\u05d5\u05d3\u05d5\u05ea. " +
+    "\u05e2\u05de\u05d5\u05d3\u05d4 \u05d6\u05d5 ('\u05d4\u05e0\u05d7\u05d9\u05d5\u05ea') \u05e0\u05d5\u05e2\u05d3\u05d4 \u05dc\u05d4\u05e1\u05d1\u05e8 \u05dc\u05d1\u05d3 \u05d5\u05d0\u05d9\u05e0\u05d4 \u05de\u05d9\u05d5\u05d1\u05d0\u05ea \u05dc\u05de\u05e2\u05e8\u05db\u05ea.";
+
+  const ws = XLSX.utils.aoa_to_sheet([
+    headers,
+    ["", "", "", "", "", "", instructionText],
+  ]);
+
   (ws as any)["!rtl"] = true;
+  (ws as any)["!freeze"] = { xSplit: 0, ySplit: 1 };
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "\u05de\u05d5\u05d6\u05de\u05e0\u05d9\u05dd");
@@ -70,11 +78,11 @@ function sanitizeForFirestore<T extends Record<string, any>>(obj: T): T {
 
 type GuestImport = {
   name: string;
-  category?: string;
-  seats: number;
-  phone?: string;
-  statusRaw?: string;
-  notes?: string;
+  category: string | null;
+  seats: number | null;
+  phone: string | null;
+  statusRaw: string | null;
+  notes: string | null;
   invited: boolean;
   rsvpStatus: "pending" | "accepted" | "declined";
 };
@@ -85,24 +93,30 @@ function rowsToGuests(rows: Record<string, any>[]) {
     const name = String(r["\u05e9\u05dd"] ?? "").trim();
     if (!name) continue;
 
-    const category = String(r["\u05e7\u05d8\u05d2\u05d5\u05e8\u05d9\u05d4"] ?? "").trim();
-    const seats = normalizeSeats(r["\u05de\u05e1\u05e4\u05e8 \u05de\u05d5\u05d6\u05de\u05e0\u05d9\u05dd"]);
-    const phone = String(r["\u05de\u05e1\u05e4\u05e8 \u05d8\u05dc\u05e4\u05d5\u05df"] ?? "").trim();
-    const statusRaw = String(r["\u05e1\u05d8\u05d8\u05d5\u05e1"] ?? "").trim();
-    const notes = String(r["\u05d4\u05e2\u05e8\u05d5\u05ea"] ?? "").trim();
-    const rsvpStatus = mapHebrewStatusToRsvp(statusRaw);
+    const categoryRaw = String(r["\u05e7\u05d8\u05d2\u05d5\u05e8\u05d9\u05d4"] ?? "").trim();
+    const phoneRaw = String(r["\u05de\u05e1\u05e4\u05e8 \u05d8\u05dc\u05e4\u05d5\u05df"] ?? "").trim();
+    const statusRawRaw = String(r["\u05e1\u05d8\u05d8\u05d5\u05e1"] ?? "").trim();
+    const notesRaw = String(r["\u05d4\u05e2\u05e8\u05d5\u05ea"] ?? "").trim();
+    const seatsCell = r["\u05de\u05e1\u05e4\u05e8 \u05de\u05d5\u05d6\u05de\u05e0\u05d9\u05dd"];
+
+    let seats: number | null = null;
+    if (seatsCell !== undefined && seatsCell !== null && String(seatsCell).trim() !== "") {
+      const parsed = Number(String(seatsCell).replace(/[^\d.]/g, ""));
+      seats = Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed) : null;
+    }
+
+    const rsvpStatus = mapHebrewStatusToRsvp(statusRawRaw);
 
     const guest: GuestImport = {
       name,
+      category: categoryRaw || null,
       seats,
+      phone: phoneRaw || null,
+      statusRaw: statusRawRaw || null,
+      notes: notesRaw || null,
       invited: rsvpStatus !== "pending",
       rsvpStatus,
     };
-
-    if (category) guest.category = category;
-    if (phone) guest.phone = phone;
-    if (notes) guest.notes = notes;
-    if (statusRaw) guest.statusRaw = statusRaw;
 
     out.push(guest);
   }
@@ -374,7 +388,7 @@ export default function GuestListCard() {
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{guest.name}</span>
                       <span className="text-xs text-neutral-500">
-                        {guest.seats} seat{guest.seats === 1 ? "" : "s"}
+                        {guest.seats ?? ""} seat{guest.seats === 1 ? "" : ""}
                       </span>
                     </div>
                     <div className="text-xs text-neutral-500">
@@ -411,6 +425,48 @@ export default function GuestListCard() {
               ) : null}
             </div>
           )}
+
+          {/* Guests table (RTL) */}
+          <div className="mt-4 overflow-x-auto" dir="rtl">
+            <table className="min-w-full border border-neutral-200 rounded-sm">
+              <thead className="bg-neutral-50">
+                <tr className="text-right">
+                  <th className="px-3 py-2 border-b border-neutral-200">שם</th>
+                  <th className="px-3 py-2 border-b border-neutral-200">קטגוריה</th>
+                  <th className="px-3 py-2 border-b border-neutral-200">מס' מוזמנים</th>
+                  <th className="px-3 py-2 border-b border-neutral-200">מספר טלפון</th>
+                  <th className="px-3 py-2 border-b border-neutral-200">סטטוס</th>
+                  <th className="px-3 py-2 border-b border-neutral-200">הערות</th>
+                </tr>
+              </thead>
+              <tbody>
+                {guests && guests.length > 0 ? (
+                  guests.map((g) => (
+                    <tr key={g.id} className="odd:bg-white even:bg-neutral-50 text-right">
+                      <td className="px-3 py-2 border-b border-neutral-100">{g.name}</td>
+                      <td className="px-3 py-2 border-b border-neutral-100">{g.category ?? ""}</td>
+                      <td className="px-3 py-2 border-b border-neutral-100">{g.seats ?? ""}</td>
+                      <td className="px-3 py-2 border-b border-neutral-100">{g.phone ?? ""}</td>
+                      <td className="px-3 py-2 border-b border-neutral-100">
+                        {g.rsvpStatus === "accepted"
+                          ? "מאושר"
+                          : g.rsvpStatus === "declined"
+                          ? "מסורב"
+                          : "ממתין"}
+                      </td>
+                      <td className="px-3 py-2 border-b border-neutral-100">{g.notes ?? ""}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td className="px-3 py-4 text-neutral-500 text-right" colSpan={6}>
+                      אין מוזמנים להצגה כרגע.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </Card>
