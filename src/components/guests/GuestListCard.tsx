@@ -92,16 +92,19 @@ function rowsToGuests(rows: Record<string, any>[]) {
     const notes = String(r["\u05d4\u05e2\u05e8\u05d5\u05ea"] ?? "").trim();
     const rsvpStatus = mapHebrewStatusToRsvp(statusRaw);
 
-    out.push({
+    const guest: GuestImport = {
       name,
-      category: category || undefined,
       seats,
-      phone: phone || undefined,
-      statusRaw: statusRaw || undefined,
-      notes: notes || undefined,
       invited: rsvpStatus !== "pending",
       rsvpStatus,
-    });
+    };
+
+    if (category) guest.category = category;
+    if (phone) guest.phone = phone;
+    if (notes) guest.notes = notes;
+    if (statusRaw) guest.statusRaw = statusRaw;
+
+    out.push(guest);
   }
   return out;
 }
@@ -132,9 +135,6 @@ async function importGuestsBatch(uid: string, guests: GuestImport[], mode: "appe
     const ref = doc(collection(db, "users", uid, "guests"));
     const payload = sanitizeForFirestore({
       ...g,
-      seats: g.seats ?? 1,
-      invited: g.invited ?? false,
-      rsvpStatus: g.rsvpStatus ?? "pending",
       createdAt: serverTimestamp(),
     });
     batch.set(ref, payload);
@@ -212,15 +212,19 @@ export default function GuestListCard() {
     if (!user) return;
     const file = e.target.files?.[0];
     if (!file) return;
-    try {
-      setIsImporting(true);
-      const rows = await readSheetFile(file);
-      const guestRows = rowsToGuests(rows);
-      await importGuestsBatch(user.uid, guestRows, importMode);
-      alert(`Imported ${guestRows.length} guests (${importMode}).`);
-    } catch (err) {
-      console.error(err);
-      alert("Import failed. See console for details.");
+  try {
+    setIsImporting(true);
+    const rows = await readSheetFile(file);
+    const guestRows = rowsToGuests(rows);
+    if (!Array.isArray(guestRows) || guestRows.length === 0) {
+      alert("No valid rows found to import.");
+      return;
+    }
+    await importGuestsBatch(user.uid, guestRows, importMode);
+    alert(`Imported ${guestRows.length} guests (${importMode}).`);
+  } catch (err) {
+    console.error(err);
+    alert("Import failed. See console for details.");
     } finally {
       setIsImporting(false);
       e.target.value = "";
