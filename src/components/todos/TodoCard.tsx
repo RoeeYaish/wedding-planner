@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { addTodo, deleteTodo, subscribeToTodos, toggleTodo } from "@/lib/todos";
@@ -10,6 +11,8 @@ export default function TodoCard() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState<string | null>(null);
+  const location = useLocation();
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -46,57 +49,69 @@ export default function TodoCard() {
     await deleteTodo(user.uid, t.id);
   };
 
+  useEffect(() => {
+    if (location.hash === "#todos") {
+      setTimeout(() => {
+        document.getElementById("todos")?.scrollIntoView({ behavior: "smooth" });
+        inputRef.current?.focus();
+      }, 50);
+    }
+  }, [location.hash]);
+
   return (
     <Card>
-      <CardHeader title="To-Do List" subtitle="Track your tasks" />
-      <form onSubmit={onAdd} className="flex gap-2 mb-3">
-        <input
-          className="flex-1 border rounded px-3 py-2"
-          placeholder="Add a task..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <button
-          className="px-3 py-2 bg-neutral-900 text-white rounded hover:bg-neutral-800"
-          type="submit"
-        >
-          Add
-        </button>
-      </form>
+      <div id="todos">
+        <CardHeader title="To-Do List" subtitle="Track your tasks" />
+        <form onSubmit={onAdd} className="flex gap-2 mb-3">
+          <input
+            ref={inputRef}
+            className="flex-1 border rounded px-3 py-2"
+            placeholder="Add a task..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <button
+            className="px-3 py-2 bg-neutral-900 text-white rounded hover:bg-neutral-800"
+            type="submit"
+          >
+            Add
+          </button>
+        </form>
 
-      {loading ? (
-        <div className="text-sm text-neutral-500">Loading...</div>
-      ) : errMsg ? (
-        <div className="text-sm text-red-600">{errMsg}</div>
-      ) : todos.length === 0 ? (
-        <div className="text-sm text-neutral-500">No tasks yet.</div>
-      ) : (
-        <ul className="space-y-2">
-          {todos.map((t) => (
-            <li
-              key={t.id}
-              className="flex items-center justify-between border rounded px-3 py-2"
-            >
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={t.completed}
-                  onChange={() => onToggle(t)}
-                />
-                <span className={t.completed ? "line-through text-neutral-400" : ""}>
-                  {t.text}
-                </span>
-              </label>
-              <button
-                className="text-sm text-red-600 hover:underline"
-                onClick={() => onDelete(t)}
+        {loading ? (
+          <div className="text-sm text-neutral-500">Loading...</div>
+        ) : errMsg ? (
+          <div className="text-sm text-red-600">{errMsg}</div>
+        ) : todos.length === 0 ? (
+          <div className="text-sm text-neutral-500">No tasks yet.</div>
+        ) : (
+          <ul className="space-y-2">
+            {todos.map((t) => (
+              <li
+                key={t.id}
+                className="flex items-center justify-between border rounded px-3 py-2"
               >
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={t.completed}
+                    onChange={() => onToggle(t)}
+                  />
+                  <span className={t.completed ? "line-through text-neutral-400" : ""}>
+                    {t.text}
+                  </span>
+                </label>
+                <button
+                  className="text-sm text-red-600 hover:underline"
+                  onClick={() => onDelete(t)}
+                >
+                  Delete
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </Card>
   );
 }

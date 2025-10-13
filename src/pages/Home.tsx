@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import Countdown from "@/components/Countdown";
 import { Card, CardHeader } from "@/components/ui/Card";
+import NextStepsCard from "@/components/next-steps/NextStepsCard";
 import TodoCard from "@/components/todos/TodoCard";
 
 export default function Home() {
@@ -63,10 +64,7 @@ export default function Home() {
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {/* Next Steps */}
-          <Card>
-            <CardHeader title="Next Steps" subtitle="You're all caught up!" />
-            <div className="text-sm text-neutral-500">Placeholder content.</div>
-          </Card>
+          <NextStepsCard />
 
           {/* To-Do List */}
           <TodoCard />
