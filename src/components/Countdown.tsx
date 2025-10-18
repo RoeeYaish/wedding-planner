@@ -33,7 +33,7 @@ export default function Countdown({ targetISO }: Props) {
 
   return (
     <div className="text-center">
-      <div className="mb-3 text-sm font-medium text-muted uppercase tracking-wide">
+  <div className="mb-3 text-sm font-medium text-skin-muted uppercase tracking-wide">
         Days Until Wedding
       </div>
       <div className="flex items-center justify-center gap-4">
@@ -50,10 +50,10 @@ export default function Countdown({ targetISO }: Props) {
 function TimeBox({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex flex-col items-center">
-      <div className="text-4xl font-bold text-ink tabular-nums">
+  <div className="text-4xl font-bold text-skin-text tabular-nums">
         {value.toString().padStart(2, '0')}
       </div>
-      <div className="text-xs text-muted uppercase tracking-wide">
+  <div className="text-xs text-skin-muted uppercase tracking-wide">
         {label}
       </div>
     </div>

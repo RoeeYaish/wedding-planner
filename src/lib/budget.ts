@@ -14,7 +14,7 @@ import { db } from "./firebase";
 
 export type BudgetDoc = {
   limit: number; // overall budget limit
-  currency: string; // e.g., "USD"
+  currency: string; // e.g., "USD" or "ILS"
 };
 
 export type Expense = {
@@ -63,7 +63,7 @@ export function subscribeExpenses(
   );
 }
 
-export async function setBudgetLimit(uid: string, limit: number, currency = "USD") {
+export async function setBudgetLimit(uid: string, limit: number, currency = "ILS") {
   const ref = budgetDocRef(uid);
   const current = await getDoc(ref);
   const payload: BudgetDoc = { limit, currency };

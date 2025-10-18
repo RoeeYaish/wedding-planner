@@ -1,4 +1,5 @@
-import { FormEvent, useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { updateUserProfile } from "@/lib/user-profile";
 
@@ -56,7 +57,7 @@ export default function Profile() {
   };
 
   return (
-    <main className="min-h-screen grid place-items-center bg-white">
+  <main className="min-h-screen grid place-items-center bg-card">
       <div className="w-full max-w-md p-6 rounded-2xl shadow border border-neutral-100">
         <div className="flex flex-col items-center gap-3 mb-6">
           {form.photoURL ? (

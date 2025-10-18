@@ -11,7 +11,7 @@ export function Card({ children, className, dir }: CardProps) {
   return (
     <div
       className={cn(
-        "card p-6",
+        "card p-6 md:p-8",
         className
       )}
       dir={dir}
@@ -31,9 +31,13 @@ export function CardHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("mb-6 space-y-2", className)}>
-      <h3 className="text-xl font-semibold text-ink leading-tight">{title}</h3>
-      {subtitle ? <p className="text-muted text-sm leading-relaxed">{subtitle}</p> : null}
+    <div className={cn("mb-3", className)}>
+      <div className="flex items-start justify-between border-b border-[#F1EAEA] pb-3">
+        <div>
+          <h3 className="text-lg font-semibold text-skin-text tracking-wide uppercase">{title}</h3>
+          {subtitle ? <p className="text-skin-muted text-sm leading-relaxed">{subtitle}</p> : null}
+        </div>
+      </div>
     </div>
   );
 }

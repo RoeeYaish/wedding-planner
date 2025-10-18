@@ -8,9 +8,9 @@ import type { Todo } from "@/lib/todos";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const inputClass =
-  "flex-1 rounded-xl border border-border bg-paper px-4 py-2 text-sm shadow-soft transition-all placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-gold/30 focus:shadow-lift";
+  "flex-1 rounded-xl border border-skin-border bg-skin-card px-4 py-2 text-sm shadow-soft transition-all placeholder:text-skin-muted focus:outline-none focus:ring-1 focus:ring-skin-primary/30 focus:shadow-lift";
 const buttonClass =
-  "inline-flex items-center justify-center rounded-xl bg-gold px-4 py-2 text-sm font-medium text-paper shadow-soft transition-all hover:bg-gold/90 hover:shadow-lift disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex items-center justify-center rounded-xl bg-skin-primary px-4 py-2 text-sm font-medium text-skin-card shadow-soft transition-all hover:bg-skin-primary600 hover:shadow-lift disabled:pointer-events-none disabled:opacity-50";
 
 export default function TodoCard() {
   const { user } = useAuth();
@@ -89,24 +89,24 @@ export default function TodoCard() {
       ) : errMsg ? (
         <div className="text-sm text-red-600">{errMsg}</div>
       ) : todos.length === 0 ? (
-        <div className="rounded-xl bg-ivory p-8 text-center text-muted" dir="rtl">
+        <div className="rounded-xl bg-skin-bg p-8 text-center text-skin-muted" dir="rtl">
           <div className="text-4xl mb-3">📝</div>
           <p className="text-sm font-medium mb-1">אין משימות עדיין</p>
           <p className="text-xs">הוסיפו משימה ראשונה כדי להתחיל</p>
         </div>
       ) : (
-        <div className="max-h-[420px] overflow-y-auto pr-1">
-          <ul className="space-y-3">
+        <div className="max-h-72 overflow-y-auto pr-1 divide-y divide-skin-border">
+          <ul>
             {todos.map((t) => (
-              <li key={t.id} className="group flex items-center justify-between rounded-xl bg-paper p-4 transition-all">
-                <label className="flex items-center gap-3 text-sm text-ink cursor-pointer">
+              <li key={t.id} className="group flex items-center justify-between p-4">
+                <label className="flex items-center gap-3 text-sm text-skin-text cursor-pointer">
                   <input
                     type="checkbox"
                     className="h-4 w-4 accent-gold cursor-pointer"
                     checked={t.completed}
                     onChange={() => onToggle(t)}
                   />
-                  <span className={t.completed ? "line-through text-muted" : ""}>{t.text}</span>
+                  <span className={t.completed ? "line-through text-skin-muted" : ""}>{t.text}</span>
                 </label>
                 <button
                   type="button"

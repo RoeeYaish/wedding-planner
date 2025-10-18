@@ -8,12 +8,16 @@
   * {
     @apply border-border;
   }
+  html {
+    background: var(--bg);
+    color: var(--text);
+  }
   body {
     font-family: 'Heebo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    @apply bg-ivory text-ink;
+    /* body inherits colors from html (set via theme class on <html>) */
   }
   html[dir="rtl"] {
     direction: rtl;
@@ -24,21 +28,147 @@
 }
 
 @layer components {
+  /* Card: use theme vars for background, shadow and radius */
   .card {
-    @apply bg-card shadow-soft rounded-2xl border border-border;
+    background: var(--card);
+    box-shadow: var(--shadow);
+    border-radius: 16px;
   }
 
   .title-lg {
     @apply text-2xl font-semibold text-ink leading-tight;
   }
 
+  /* Pill: small rounded capsule using theme vars */
   .pill {
-    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-rose/10 text-rose border border-rose/20;
+    display: inline-flex;
+    align-items: center;
+    background: var(--pill-bg);
+    color: var(--text);
+    border-radius: 9999px;
+    padding: .25rem .6rem;
+  }
+
+  .pill-success {
+    background-color: rgba(163,201,168,0.13);
+    color: #24613a;
+    border: 1px solid rgba(163,201,168,0.18);
+  }
+
+  .pill-warn {
+    background-color: rgba(238,197,172,0.12);
+    color: #8a4b2d;
+    border: 1px solid rgba(222,150,110,0.08);
+  }
+
+  /* card helpers */
+  /* hover lift retained */
+  .card:hover {
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-1px);
+  }
+
+  .card-pad { padding: 1rem; }
+
+  /* badge / KPI pill */
+  .badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .375rem;
+    padding: .35rem .6rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--primary) 25%, white);
+    color: #6D4B53;
+    border: 1px solid color-mix(in oklab, var(--primary) 45%, white);
+  }
+
+  /* Primary button: use theme primary colors */
+  .btn-primary {
+    background: var(--primary);
+    color: var(--on-primary, #3b2a2f);
+    border-radius: 12px;
+    padding: .6rem 1rem;
+    transition: .2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-600);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lift);
+    opacity: .98;
+  }
+
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .shadow-lift { box-shadow: var(--shadow-lift); }
+
+  .bg-app { background: var(--bg); }
+  .bg-card { background: var(--card); }
+
+  .text-muted { color: var(--muted); }
+
+  /* ensure small hover opacity tweak */
+  .btn-primary:hover { opacity: 0.92; }
+
+  .shadow-soft {
+    box-shadow: var(--shadow);
+  }
+
+  .shadow-lift {
+    box-shadow: 0 6px 12px rgba(201,169,106,0.15);
+    transform: translateY(-6px) scale(1.01);
+  }
+
+  /* entry animation helper */
+  .entry-fade {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+
+  .entry-fade.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 520px) {
+    html {
+      font-size: 14px; /* slightly reduced */
+    }
+    .btn-primary {
+      display: block;
+      width: 100%;
+    }
+    /* Modal should be full width on small screens with rounded corners */
+    .modal-mobile {
+      width: calc(100% - 2rem) !important;
+      max-width: calc(100% - 2rem) !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      border-radius: 12px !important;
+    }
+  }
+
+  /* Drawer panel RTL flip and subtle animation */
+  .drawer-panel {
+    right: 0;
+  }
+
+  html[dir="rtl"] .drawer-panel {
+    right: auto;
+    left: 0;
   }
 
   .muted {
     @apply text-muted;
   }
+
+  /* Accent link color and muted hr */
+  .link-accent { color: var(--accent); }
+  .hr-muted { height: 1px; background: rgba(0,0,0,.06); }
 }
 
 .home-grid {

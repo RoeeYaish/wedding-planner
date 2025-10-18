@@ -14,12 +14,12 @@ import {
   type VendorStatus,
 } from "@/lib/vendors";
 
-const inputClass =
-  "w-full rounded-xl border border-border bg-paper px-4 py-2 text-sm shadow-soft transition-all placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-gold/30 focus:shadow-lift";
+  const inputClass =
+  "w-full rounded-xl border border-skin-border bg-skin-card px-4 py-2 text-sm shadow-soft transition-all placeholder:text-skin-muted focus:outline-none focus:ring-1 focus:ring-skin-primary/30 focus:shadow-lift";
 const outlineButton =
-  "inline-flex items-center justify-center rounded-xl border border-border bg-paper px-4 py-2 text-sm font-medium text-ink shadow-soft transition-all hover:bg-ivory hover:shadow-lift";
+  "inline-flex items-center justify-center rounded-xl border border-skin-border bg-skin-card px-4 py-2 text-sm font-medium text-skin-text shadow-soft transition-all hover:bg-skin-bg hover:shadow-lift";
 const primaryButton =
-  "inline-flex items-center justify-center rounded-xl bg-gold px-4 py-2 text-sm font-medium text-paper shadow-soft transition-all hover:bg-gold/90 hover:shadow-lift disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex items-center justify-center rounded-xl bg-skin-primary px-4 py-2 text-sm font-medium text-skin-card shadow-soft transition-all hover:bg-skin-primary600 hover:shadow-lift disabled:pointer-events-none disabled:opacity-50";
 
 type Draft = {
   name: string;
@@ -144,7 +144,7 @@ export default function VendorManagementCard() {
           <FieldInput label="תקציב משוער" value={draft.budgetEstimate ?? ""} onChange={(value) => setDraft((d) => ({ ...d, budgetEstimate: value }))} inputMode="numeric" />
 
           <div>
-            <label className="mb-1 block text-xs text-gray-500">סטטוס</label>
+            <label className="mb-1 block text-xs text-skin-muted">סטטוס</label>
             <Select className={`${inputClass} pr-8`} value={draft.status ?? "pending"} onChange={(e) => setDraft((d) => ({ ...d, status: e.target.value as VendorStatus }))}>
               <option value="pending">בהמתנה</option>
               <option value="contacted">יצרנו קשר</option>
@@ -170,20 +170,17 @@ export default function VendorManagementCard() {
           ))}
         </div>
       ) : vendors.length === 0 ? (
-        <div className="rounded-xl bg-ivory p-8 text-center text-muted" dir="rtl">
+        <div className="rounded-xl bg-skin-bg p-8 text-center text-skin-muted" dir="rtl">
           <div className="text-4xl mb-3">🏢</div>
           <p className="text-sm font-medium mb-1">אין ספקים עדיין</p>
           <p className="text-xs">הוסיפו ספק ראשון כדי להתחיל</p>
         </div>
       ) : (
-        <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+        <div className="max-h-72 overflow-y-auto pr-1 divide-y divide-skin-border">
           {vendors.map((vendor) => {
             if (editingId === vendor.id) {
               return (
-                <div
-                  key={vendor.id}
-                  className="rounded-xl border border-border bg-paper p-4 shadow-soft"
-                >
+                <div key={vendor.id} className="p-4 bg-skin-card">
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                     <FieldInput
                       label="שם ספק (חובה)"
@@ -212,7 +209,7 @@ export default function VendorManagementCard() {
                     />
 
                     <div>
-                      <label className="mb-1 block text-xs text-gray-500">סטטוס</label>
+                      <label className="mb-1 block text-xs text-skin-muted">סטטוס</label>
                       <select
                         className={`${inputClass} pr-8`}
                         value={editDraft.status ?? "pending"}
@@ -234,7 +231,7 @@ export default function VendorManagementCard() {
                     />
                   </div>
 
-                  <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-wrap gap-2">
                     <button className={primaryButton} onClick={saveEdit} disabled={saving}>
                       עדכון
                     </button>
@@ -247,25 +244,22 @@ export default function VendorManagementCard() {
               );
             }
 
-            return (
-              <div
-                key={vendor.id}
-                className="rounded-xl border border-border bg-paper p-4 shadow-soft transition-all hover:bg-ivory hover:shadow-lift"
-              >
+              return (
+              <div key={vendor.id} className="p-4 bg-skin-card">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="font-bold text-ink text-base mb-2">{vendor.name}</div>
-                    <div className="space-y-1 text-sm text-muted">
+          <div className="flex-1">
+            <div className="font-bold text-skin-text text-base mb-2">{vendor.name}</div>
+            <div className="space-y-1 text-sm text-skin-muted">
                       {vendor.phone && <div>{vendor.phone}</div>}
                       {vendor.serviceType && <Badge variant="secondary" className="text-xs">{vendor.serviceType}</Badge>}
                     </div>
                   </div>
                   <div className="flex flex-col gap-1 text-xs">
-                    <button className="rounded border border-border bg-paper px-2 py-1 text-ink shadow-soft transition-all hover:bg-ivory hover:shadow-lift" onClick={() => startEdit(vendor)}>
+                      <button className="rounded border border-skin-border bg-skin-card px-2 py-1 text-skin-text transition-all hover:bg-skin-bg" onClick={() => startEdit(vendor)}>
                       עריכה
                     </button>
                     <button
-                      className="rounded border border-red-200 bg-paper px-2 py-1 text-red-600 shadow-soft transition-all hover:bg-red-50 hover:shadow-lift"
+                          className="rounded border border-red-200 bg-skin-card px-2 py-1 text-red-600 transition-all hover:bg-red-50"
                       onClick={() => onDelete(vendor.id)}
                     >
                       מחיקה
@@ -304,7 +298,7 @@ function FieldInput({
 }: FieldInputProps) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-gray-500">{label}</label>
+  <label className="mb-1 block text-xs text-skin-muted">{label}</label>
       <Input
         className={inputClass}
         value={value}

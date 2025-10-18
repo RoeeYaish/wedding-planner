@@ -183,11 +183,11 @@ export default function GuestListCard() {
   });
 
   const inputClass =
-    "w-full rounded-xl border border-border bg-paper px-4 py-2 text-sm shadow-soft transition-all placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-gold/30 focus:shadow-lift";
+     "w-full rounded-xl border border-skin-border bg-skin-card px-4 py-2 text-sm shadow-soft transition-all placeholder:text-skin-muted focus:outline-none focus:ring-1 focus:ring-skin-primary/30 focus:shadow-lift";
   const outlineButton =
-    "inline-flex items-center justify-center rounded-xl border border-border bg-paper px-4 py-2 text-sm font-medium text-ink shadow-soft transition-all hover:bg-ivory hover:shadow-lift";
+    "inline-flex items-center justify-center rounded-xl border border-skin-border bg-skin-card px-4 py-2 text-sm font-medium text-skin-text shadow-soft transition-all hover:bg-skin-bg hover:shadow-lift";
   const primaryButton =
-    "inline-flex items-center justify-center rounded-xl bg-gold px-4 py-2 text-sm font-medium text-paper shadow-soft transition-all hover:bg-gold/90 hover:shadow-lift disabled:pointer-events-none disabled:opacity-50";
+     "inline-flex items-center justify-center rounded-xl bg-skin-primary px-4 py-2 text-sm font-medium text-skin-card shadow-soft transition-all hover:bg-skin-primary600 hover:shadow-lift disabled:pointer-events-none disabled:opacity-50";
 
   useEffect(() => {
     if (!user) return;
@@ -317,16 +317,16 @@ export default function GuestListCard() {
       className="scroll-body"
       actions={
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-muted">Import mode:</span>
-          <Select className="rounded-xl border border-border bg-paper px-3 py-1 text-xs" value={importMode} onChange={onSaveLimitModeChange}>
+          <span className="text-xs text-skin-muted">Import mode:</span>
+          <Select className="rounded-xl border border-skin-border bg-skin-card px-3 py-1 text-xs" value={importMode} onChange={onSaveLimitModeChange}>
             <option value="append">Append</option>
             <option value="replace">Replace all</option>
           </Select>
-          <label className="cursor-pointer rounded-xl border border-border bg-paper px-3 py-1 text-xs text-ink transition-all hover:bg-ivory">
+          <label className="cursor-pointer rounded-xl border border-skin-border bg-skin-card px-3 py-1 text-xs text-skin-text transition-all hover:bg-skin-bg">
             {isImporting ? "Importing..." : "Import CSV/XLSX"}
             <input type="file" accept=".csv,.xlsx,.xls" onChange={onChooseFile} className="hidden" disabled={isImporting} />
           </label>
-          <Button className="rounded-xl border border-border bg-paper px-3 py-1 text-xs text-ink" type="button" onClick={onDownloadTemplate}>
+          <Button className="rounded-xl border border-skin-border bg-skin-card px-3 py-1 text-xs text-skin-text" type="button" onClick={onDownloadTemplate}>
             Download Template
           </Button>
         </div>
@@ -343,7 +343,7 @@ export default function GuestListCard() {
         <div className="text-sm text-red-600">{error}</div>
       ) : (
         <>
-          <div className="grid gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-2 rounded-lg border border-skin-border bg-skin-bg p-3 sm:grid-cols-2 lg:grid-cols-4">
             <StatBox label="Total guests" value={totals.totalGuests} />
             <StatBox label="Total seats" value={totals.seats} />
             <StatBox label="Accepted" value={totals.accepted} />
@@ -364,19 +364,16 @@ export default function GuestListCard() {
           </form>
 
           {guests.length === 0 ? (
-            <div className="rounded-xl bg-ivory p-8 text-center text-muted" dir="rtl">
+            <div className="rounded-xl bg-skin-bg p-8 text-center text-skin-muted" dir="rtl">
               <div className="text-4xl mb-3">👥</div>
               <p className="text-sm font-medium mb-1">אין מוזמנים עדיין</p>
               <p className="text-xs">הוסיפו מוזמן ראשון כדי להתחיל</p>
             </div>
           ) : (
-            <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+            <div className="max-h-72 overflow-y-auto pr-1 divide-y divide-skin-border">
               {guests.map((guest) =>
                 editingId === guest.id ? (
-                  <div
-                    key={guest.id}
-                    className="rounded-xl border border-border bg-paper p-4 shadow-soft"
-                  >
+                  <div key={guest.id} className="p-4 bg-skin-card">
                     <div className="grid gap-2 sm:grid-cols-2">
                       <FieldInput
                         label="Guest name"
@@ -401,7 +398,6 @@ export default function GuestListCard() {
                         onChange={(val) => setEditDraft((d) => ({ ...d, phone: val }))}
                       />
                       <div>
-                        <label className="mb-1 block text-xs text-gray-500">Status</label>
                         <select
                           className={`${inputClass} pr-8`}
                           value={editDraft.status}
@@ -433,30 +429,31 @@ export default function GuestListCard() {
                     </div>
                   </div>
                 ) : (
-                  <div key={guest.id} className="rounded-xl border border-border bg-paper p-4 shadow-soft">
+                  <div key={guest.id} className="p-4 bg-skin-card">
                     <div className="text-right">
-                      <div className="text-base font-semibold text-gray-900">{guest.name}</div>
-                      <div className="mt-2 space-y-2 text-sm text-gray-600">
-                        <div className="border-t border-gray-100 pt-2 first:border-none first:pt-0">
+                      <div className="text-base font-semibold text-skin-text">{guest.name}</div>
+                      <div className="mt-2 space-y-2 text-sm text-skin-muted">
+                        <div>
                           Seats: {guest.seats != null ? guest.seats : "-"}
                           {guest.category ? ` - Category: ${guest.category}` : ""}
                         </div>
-                        <div className="border-t border-gray-100 pt-2 first:border-none first:pt-0">
+                        <div>
                           Status: {guest.rsvpStatus}
                           {guest.statusRaw ? ` (${guest.statusRaw})` : ""}
                         </div>
                         {guest.notes ? (
-                          <div className="border-t border-gray-100 pt-2 first:border-none first:pt-0">
+                          <div>
                             Notes: {guest.notes}
                           </div>
                         ) : null}
                         {guest.phone ? (
-                          <div className="border-t border-gray-100 pt-2 first:border-none first:pt-0">
+                          <div>
                             Phone: {guest.phone}
                           </div>
                         ) : null}
                       </div>
-                    </div>                      <div className="flex flex-wrap gap-2 text-sm">
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-sm">
                       <select
                         className={`${inputClass} w-auto pr-8`}
                         value={guest.rsvpStatus}
@@ -484,35 +481,35 @@ export default function GuestListCard() {
             </div>
           )}
 
-          <div className="mt-4 overflow-x-auto rounded-xl border border-border shadow-soft" dir="rtl">
+          <div className="mt-4 overflow-x-auto rounded-xl border border-skin-border shadow-soft" dir="rtl">
             <table className="min-w-full">
-              <thead className="sticky top-0 bg-paper text-xs font-medium text-ink">
+              <thead className="sticky top-0 bg-skin-card text-xs font-medium text-skin-text">
                 <tr>
-                  <th className="border-b border-border px-3 py-2 text-right">שם</th>
-                  <th className="border-b border-border px-3 py-2 text-right">קטגוריה</th>
-                  <th className="border-b border-border px-3 py-2 text-right">מס' מוזמנים</th>
-                  <th className="border-b border-border px-3 py-2 text-right">מספר טלפון</th>
-                  <th className="border-b border-border px-3 py-2 text-right">סטטוס</th>
-                  <th className="border-b border-border px-3 py-2 text-right">הערות</th>
+                  <th className="border-b border-skin-border px-3 py-2 text-right">שם</th>
+                  <th className="border-b border-skin-border px-3 py-2 text-right">קטגוריה</th>
+                  <th className="border-b border-skin-border px-3 py-2 text-right">מס' מוזמנים</th>
+                  <th className="border-b border-skin-border px-3 py-2 text-right">מספר טלפון</th>
+                  <th className="border-b border-skin-border px-3 py-2 text-right">סטטוס</th>
+                  <th className="border-b border-skin-border px-3 py-2 text-right">הערות</th>
                 </tr>
               </thead>
               <tbody>
                 {guests.length > 0 ? (
                   guests.map((g, index) => (
-                    <tr key={g.id} className={`text-sm transition-all hover:bg-ivory ${index % 2 === 0 ? 'bg-paper' : 'bg-ivory'}`}>
-                      <td className="border-b border-border px-3 py-2 text-ink font-medium truncate max-w-0" title={g.name}>{g.name}</td>
-                      <td className="border-b border-border px-3 py-2 text-muted truncate max-w-0" title={g.category ?? ""}>{g.category ?? ""}</td>
-                      <td className="border-b border-border px-3 py-2 text-ink text-center">{g.seats ?? ""}</td>
-                      <td className="border-b border-border px-3 py-2 text-muted">{g.phone ?? ""}</td>
-                      <td className="border-b border-border px-3 py-2">
+                    <tr key={g.id} className={`text-sm transition-all hover:bg-skin-bg ${index % 2 === 0 ? 'bg-skin-card' : 'bg-skin-bg'}`}>
+                      <td className="border-b border-skin-border px-3 py-2 text-skin-text font-medium truncate max-w-0" title={g.name}>{g.name}</td>
+                      <td className="border-b border-skin-border px-3 py-2 text-skin-muted truncate max-w-0" title={g.category ?? ""}>{g.category ?? ""}</td>
+                      <td className="border-b border-skin-border px-3 py-2 text-skin-text text-center">{g.seats ?? ""}</td>
+                      <td className="border-b border-skin-border px-3 py-2 text-skin-muted">{g.phone ?? ""}</td>
+                      <td className="border-b border-skin-border px-3 py-2">
                         <StatusBadge status={g.rsvpStatus} />
                       </td>
-                      <td className="border-b border-border px-3 py-2 text-muted truncate max-w-0" title={g.notes ?? ""}>{g.notes ?? ""}</td>
+                      <td className="border-b border-skin-border px-3 py-2 text-skin-muted truncate max-w-0" title={g.notes ?? ""}>{g.notes ?? ""}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td className="px-3 py-6 text-muted text-center" colSpan={6}>
+                    <td className="px-3 py-6 text-skin-muted text-center" colSpan={6}>
                       אין מוזמנים להצגה כרגע.
                     </td>
                   </tr>
@@ -528,9 +525,9 @@ export default function GuestListCard() {
 
 function StatBox({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded border border-gray-200 bg-white px-3 py-2 text-right">
-      <div className="text-xs text-gray-500 uppercase tracking-wide">{label}</div>
-      <div className="text-lg font-semibold text-gray-900">{value}</div>
+  <div className="rounded border border-skin-border bg-skin-card px-3 py-2 text-right">
+      <div className="text-xs text-skin-muted uppercase tracking-wide">{label}</div>
+      <div className="text-lg font-semibold text-skin-text">{value}</div>
     </div>
   );
 }
@@ -550,9 +547,9 @@ function FieldInput({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-gray-500">{label}</label>
+      <label className="mb-1 block text-xs text-skin-muted">{label}</label>
       <input
-        className="w-full rounded border border-gray-300 px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200"
+        className="w-full rounded border border-skin-border bg-skin-card px-3 py-2 text-sm placeholder:text-skin-muted focus:outline-none focus:ring-2 focus:ring-skin-overlay"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         inputMode={inputMode}

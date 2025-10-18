@@ -50,18 +50,18 @@ export default function NextStepsCard() {
     <SectionCard title="Next Steps" subtitle="Helpful tasks to get you started">
       <ul className="space-y-3">
         {steps.map((s) => (
-          <li key={s.id} className="flex items-start justify-between gap-3 rounded-xl bg-paper p-4">
+          <li key={s.id} className="flex items-start justify-between gap-3 rounded-xl bg-skin-card p-4">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <StatusBadge status={s.status} />
-                <span className="font-medium text-ink">{s.title}</span>
+                <span className="font-medium text-skin-text">{s.title}</span>
               </div>
               {s.note ? (
-                <div className="text-right text-xs text-muted">{s.note}</div>
+                <div className="text-right text-xs text-skin-muted">{s.note}</div>
               ) : null}
             </div>
             {s.action ? (
-              <Link to={s.action.to} className="inline-flex items-center justify-center rounded-xl border border-border bg-paper px-4 py-2 text-sm font-medium text-ink">
+              <Link to={s.action.to} className="inline-flex items-center justify-center rounded-xl border border-skin-border bg-skin-card px-4 py-2 text-sm font-medium text-skin-text">
                 {s.action.label}
               </Link>
             ) : null}

@@ -31,11 +31,11 @@ const emptyDraft: Draft = {
 };
 
 const inputClass =
-  "w-full rounded-xl border border-border bg-paper px-4 py-2 text-sm shadow-soft transition-all placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-gold/30 focus:shadow-lift";
+  "w-full rounded-xl border border-skin-border bg-skin-card px-4 py-2 text-sm shadow-soft transition-all placeholder:text-skin-muted focus:outline-none focus:ring-1 focus:ring-skin-primary/30 focus:shadow-lift";
 const outlineButton =
-  "inline-flex items-center justify-center rounded-xl border border-border bg-paper px-4 py-2 text-sm font-medium text-ink shadow-soft transition-all hover:bg-ivory hover:shadow-lift";
+  "inline-flex items-center justify-center rounded-xl border border-skin-border bg-skin-card px-4 py-2 text-sm font-medium text-skin-text shadow-soft transition-all hover:bg-skin-bg hover:shadow-lift";
 const primaryButton =
-  "inline-flex items-center justify-center rounded-xl bg-gold px-4 py-2 text-sm font-medium text-paper shadow-soft transition-all hover:bg-gold/90 hover:shadow-lift disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex items-center justify-center rounded-xl bg-skin-primary px-4 py-2 text-sm font-medium text-skin-card shadow-soft transition-all hover:bg-skin-primary600 hover:shadow-lift disabled:pointer-events-none disabled:opacity-50";
 
 export default function TimelineCard() {
   const { user } = useAuth();
@@ -181,7 +181,7 @@ export default function TimelineCard() {
           <Skeleton className="h-4 w-full" />
         </>
       ) : items.length === 0 ? (
-        <div className="rounded-xl bg-ivory p-8 text-center text-muted" dir="rtl">
+        <div className="rounded-xl bg-skin-bg p-8 text-center text-skin-muted" dir="rtl">
           <div className="text-4xl mb-3">📅</div>
           <p className="text-sm font-medium mb-1">אין אירועים עדיין</p>
           <p className="text-xs">הוסיפו אירוע ראשון ללו"ז החתונה</p>
@@ -199,11 +199,11 @@ export default function TimelineCard() {
                   className="relative flex items-start gap-4 pr-4"
                 >
                   <div className="flex flex-col items-center">
-                    <div className="rounded-full bg-gold px-3 py-1 text-xs font-medium text-paper shadow-soft">
+                      <div className="rounded-full bg-skin-primary px-3 py-1 text-xs font-medium text-skin-card shadow-soft">
                       {editDraft.time}
                     </div>
                   </div>
-                  <div className="flex-1 rounded-xl border border-border bg-paper p-4 shadow-soft">
+                    <div className="flex-1 rounded-xl border border-skin-border bg-skin-card p-4 shadow-soft">
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                     <FieldInput
                       label="כותרת אירוע"
@@ -259,21 +259,21 @@ export default function TimelineCard() {
                 className="relative flex items-start gap-4 pr-4"
               >
                 <div className="flex flex-col items-center">
-                  <div className="rounded-full bg-gold px-3 py-1 text-xs font-medium text-paper shadow-soft">
+                  <div className="rounded-full bg-skin-primary px-3 py-1 text-xs font-medium text-skin-card shadow-soft">
                     {event.time}
                   </div>
                 </div>
-                <div className="flex-1 rounded-xl border border-border bg-paper p-4 shadow-soft transition-all hover:bg-ivory hover:shadow-lift">
+                  <div className="flex-1 rounded-xl border border-skin-border bg-skin-card p-4 shadow-soft transition-all hover:bg-skin-bg hover:shadow-lift">
                   <div className="text-right">
-                    <div className="text-base font-bold text-ink">
+                      <div className="text-base font-bold text-skin-text">
                       {event.title}
                     </div>
-                    {details.length > 0 ? (
-                      <div className="mt-2 space-y-2 text-sm text-muted">
+                      {details.length > 0 ? (
+                        <div className="mt-2 space-y-2 text-sm text-skin-muted">
                         {details.map((detail, idx) => (
                           <div
                             key={idx}
-                            className="border-t border-border pt-2 first:border-none first:pt-0"
+                            className="border-t border-skin-border pt-2 first:border-none first:pt-0"
                           >
                             {detail}
                           </div>
@@ -347,7 +347,7 @@ function FieldInput({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-muted">{label}</label>
+  <label className="mb-1 block text-xs text-skin-muted">{label}</label>
       <Input
         className={inputClass}
         value={value}

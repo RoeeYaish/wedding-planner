@@ -13,14 +13,14 @@ export default {
 			// keep existing theme values
 			background: 'hsl(var(--background))',
 			foreground: 'hsl(var(--foreground))',
-  			ivory: '#FAFAF7',
-  			paper: '#FFFFFF',
-  			ink: '#111827',
-  			muted: '#6B7280',
+			ivory: '#FAFAF7',
+			paper: 'var(--card)',
+			ink: 'var(--text)',
+			muted: 'var(--muted)',
   			gold: '#C8A977',
   			rose: '#E6B8C3',
   			border: '#E5E7EB',
-  			card: '#FFFFFF',
+			card: 'var(--card)',
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
   				foreground: 'hsl(var(--primary-foreground))'

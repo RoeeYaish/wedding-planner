@@ -22,8 +22,8 @@ export default function SectionHeader({
       )}
     >
       <div className="space-y-1 text-right">
-        <h3 className="text-lg font-semibold text-neutral-900">{title}</h3>
-        {subtitle ? <p className="text-sm text-neutral-500">{subtitle}</p> : null}
+        <h3 className="text-lg font-semibold text-skin-text">{title}</h3>
+        {subtitle ? <p className="text-sm text-skin-muted">{subtitle}</p> : null}
       </div>
       {actions ? (
         <div className="flex items-center gap-2 md:mt-0 mt-2">{actions}</div>
