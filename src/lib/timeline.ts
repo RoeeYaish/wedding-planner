@@ -20,7 +20,7 @@ export type TimelineEvent = {
   location?: string | null;
   contact?: string | null;
   notes?: string | null;
-  createdAt?: any;
+  createdAt?: unknown;
 };
 
 export function timelineCol(uid: string) {
@@ -36,7 +36,7 @@ export function subscribeTimeline(uid: string, cb: (events: TimelineEvent[]) => 
   return onSnapshot(q, (snap) => {
     const out: TimelineEvent[] = snap.docs.map((d) => ({
       id: d.id,
-      ...(d.data() as any),
+      ...(d.data() as Omit<TimelineEvent, 'id'>),
     }));
     cb(out);
   });

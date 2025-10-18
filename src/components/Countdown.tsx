@@ -32,19 +32,30 @@ export default function Countdown({ targetISO }: Props) {
   }, [target]);
 
   return (
-    <div className="flex items-center gap-6">
-      <TimeBox label="Days" value={diff.days} />
-      <TimeBox label="Hours" value={diff.hours} />
-      <TimeBox label="Minutes" value={diff.minutes} />
+    <div className="text-center">
+      <div className="mb-3 text-sm font-medium text-muted uppercase tracking-wide">
+        Days Until Wedding
+      </div>
+      <div className="flex items-center justify-center gap-4">
+        <TimeBox label="Days" value={diff.days} />
+        <div className="h-8 w-px bg-border"></div>
+        <TimeBox label="Hours" value={diff.hours} />
+        <div className="h-8 w-px bg-border"></div>
+        <TimeBox label="Minutes" value={diff.minutes} />
+      </div>
     </div>
   );
 }
 
 function TimeBox({ label, value }: { label: string; value: number }) {
   return (
-    <div className="text-center">
-      <div className="text-3xl font-semibold">{value}</div>
-      <div className="text-xs text-neutral-500">{label}</div>
+    <div className="flex flex-col items-center">
+      <div className="text-4xl font-bold text-ink tabular-nums">
+        {value.toString().padStart(2, '0')}
+      </div>
+      <div className="text-xs text-muted uppercase tracking-wide">
+        {label}
+      </div>
     </div>
   );
 }

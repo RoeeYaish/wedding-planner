@@ -1,8 +1,10 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut, type User } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 import { ensureUserDoc, subscribeToUserProfile, type UserProfile } from "@/lib/user-profile";
+import { setDocumentDirection } from "@/lib/i18n";
 
 type AuthContextType = {
   user: User | null;
@@ -20,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
+    setDocumentDirection('he');
     let unsubscribeProfile: (() => void) | null = null;
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {

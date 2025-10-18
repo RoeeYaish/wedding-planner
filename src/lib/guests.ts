@@ -22,7 +22,7 @@ export type Guest = {
   notes?: string | null;
   statusRaw?: string | null;
   email?: string | null;
-  createdAt?: any;
+  createdAt?: unknown;
 };
 
 type GuestInput = {
@@ -37,7 +37,7 @@ type GuestInput = {
   statusRaw?: string | null;
 };
 
-type GuestUpdate = Partial<Omit<GuestInput, "name">>;
+type GuestUpdate = Partial<GuestInput>;
 
 const toOptionalString = (value?: string | null) => {
   if (value === null) return null;
@@ -121,6 +121,7 @@ export async function updateGuest(uid: string, id: string, data: GuestUpdate) {
   if (data.category !== undefined) payload.category = toOptionalString(data.category);
   if (data.notes !== undefined) payload.notes = toOptionalString(data.notes);
   if (data.statusRaw !== undefined) payload.statusRaw = toOptionalString(data.statusRaw);
+  if (data.name !== undefined) payload.name = data.name;
 
   await updateDoc(ref, payload);
 }

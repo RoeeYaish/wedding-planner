@@ -21,7 +21,7 @@ export type Vendor = {
   budgetEstimate?: number | null;
   status?: VendorStatus | null;
   notes?: string | null;
-  createdAt?: any;
+  createdAt?: unknown;
 };
 
 export function vendorsCol(uid: string) {
@@ -33,7 +33,7 @@ export function subscribeVendors(uid: string, cb: (vendors: Vendor[]) => void) {
   return onSnapshot(q, (snap) => {
     const out: Vendor[] = snap.docs.map((d) => ({
       id: d.id,
-      ...(d.data() as any),
+      ...(d.data() as Omit<Vendor, 'id'>),
     }));
     cb(out);
   });

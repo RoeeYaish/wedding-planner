@@ -14,7 +14,7 @@ export type UserProfile = {
   email: string | null;
   displayName: string | null;
   photoURL: string | null;
-  createdAt?: any; // Firestore timestamp
+  createdAt?: unknown; // Firestore timestamp
   // New optional fields
   weddingDate?: string | null; // ISO yyyy-mm-dd (from <input type="date">)
   weddingLocation?: string | null;

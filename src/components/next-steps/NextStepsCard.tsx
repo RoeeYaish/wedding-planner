@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
-import { Card, CardContent } from "@/components/ui/Card";
-import SectionHeader from "@/components/ui/section-header";
+import { SectionCard } from "@/components/ui/section-card";
+import { Badge } from "@/components/ui/badge";
 
 type Step = {
   id: string;
@@ -47,53 +47,37 @@ export default function NextStepsCard() {
   ];
 
   return (
-    <Card>
-      <CardContent className="space-y-4">
-        <SectionHeader
-          title="Next Steps"
-          subtitle="Helpful tasks to get you started"
-        />
-        <ul className="space-y-3">
-          {steps.map((s) => (
-            <li
-              key={s.id}
-              className="flex items-start justify-between gap-3 rounded border border-neutral-200 px-3 py-2"
-            >
-              <div>
-                <div className="flex items-center gap-2">
-                  <StatusBadge status={s.status} />
-                  <span className="font-medium text-neutral-900">{s.title}</span>
-                </div>
-                {s.note ? (
-                  <div className="mt-1 text-xs text-neutral-500">{s.note}</div>
-                ) : null}
+    <SectionCard title="Next Steps" subtitle="Helpful tasks to get you started">
+      <ul className="space-y-3">
+        {steps.map((s) => (
+          <li key={s.id} className="flex items-start justify-between gap-3 rounded-xl bg-paper p-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <StatusBadge status={s.status} />
+                <span className="font-medium text-ink">{s.title}</span>
               </div>
-              {s.action ? (
-                <Link
-                  to={s.action.to}
-                  className="inline-flex items-center justify-center rounded border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-700 transition hover:bg-neutral-100"
-                >
-                  {s.action.label}
-                </Link>
+              {s.note ? (
+                <div className="text-right text-xs text-muted">{s.note}</div>
               ) : null}
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
+            </div>
+            {s.action ? (
+              <Link to={s.action.to} className="inline-flex items-center justify-center rounded-xl border border-border bg-paper px-4 py-2 text-sm font-medium text-ink">
+                {s.action.label}
+              </Link>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </SectionCard>
   );
 }
 
 function StatusBadge({ status }: { status: "done" | "pending" | "soon" }) {
   const map = {
-    done: { label: "Done", cls: "bg-green-100 text-green-700 border-green-200" },
-    pending: { label: "Pending", cls: "bg-amber-100 text-amber-700 border-amber-200" },
-    soon: { label: "Soon", cls: "bg-neutral-100 text-neutral-600 border-neutral-200" },
+    done: { label: "Done", variant: "default" as const },
+    pending: { label: "Pending", variant: "secondary" as const },
+    soon: { label: "Soon", variant: "outline" as const },
   }[status];
 
-  return (
-    <span className={`text-xs px-2 py-0.5 rounded border ${map.cls}`}>
-      {map.label}
-    </span>
-  );
+  return <Badge variant={map.variant}>{map.label}</Badge>;
 }

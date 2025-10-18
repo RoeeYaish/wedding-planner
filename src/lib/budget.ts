@@ -21,7 +21,7 @@ export type Expense = {
   id: string;
   name: string;
   amount: number; // positive number
-  createdAt?: any; // Firestore Timestamp
+  createdAt?: unknown; // Firestore Timestamp
 };
 
 export function budgetDocRef(uid: string) {

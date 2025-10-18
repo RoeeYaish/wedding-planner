@@ -1,18 +1,20 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type CardProps = {
   children: ReactNode;
   className?: string;
+  dir?: string;
 };
 
-export function Card({ children, className }: CardProps) {
+export function Card({ children, className, dir }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-neutral-200 bg-white p-6 shadow-sm",
+        "card p-6",
         className
       )}
+      dir={dir}
     >
       {children}
     </div>
@@ -29,9 +31,9 @@ export function CardHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("mb-4 space-y-1", className)}>
-      <h3 className="text-lg font-semibold text-neutral-900">{title}</h3>
-      {subtitle ? <p className="text-sm text-neutral-500">{subtitle}</p> : null}
+    <div className={cn("mb-6 space-y-2", className)}>
+      <h3 className="text-xl font-semibold text-ink leading-tight">{title}</h3>
+      {subtitle ? <p className="text-muted text-sm leading-relaxed">{subtitle}</p> : null}
     </div>
   );
 }

@@ -10,27 +10,44 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
-  			background: 'hsl(var(--background))',
-  			foreground: 'hsl(var(--foreground))',
-  			card: {
-  				DEFAULT: 'hsl(var(--card))',
-  				foreground: 'hsl(var(--card-foreground))'
-  			},
-  			popover: {
-  				DEFAULT: 'hsl(var(--popover))',
-  				foreground: 'hsl(var(--popover-foreground))'
-  			},
+			// keep existing theme values
+			background: 'hsl(var(--background))',
+			foreground: 'hsl(var(--foreground))',
+  			ivory: '#FAFAF7',
+  			paper: '#FFFFFF',
+  			ink: '#111827',
+  			muted: '#6B7280',
+  			gold: '#C8A977',
+  			rose: '#E6B8C3',
+  			border: '#E5E7EB',
+  			card: '#FFFFFF',
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
   				foreground: 'hsl(var(--primary-foreground))'
   			},
+			fontFamily: {
+				display: ['Playfair Display','serif'],
+				sans: ['Heebo','system-ui','sans-serif'],
+			},
+			colors: Object.assign({}, {
+				skin: {
+					bg: 'var(--bg)',
+					card: 'var(--card)',
+					text: 'var(--text)',
+					muted: 'var(--muted)',
+					primary: 'var(--primary)',
+					primary600: 'var(--primary-600)',
+					accent: 'var(--accent)',
+					ring: 'var(--ring)',
+					border: 'var(--border)'
+				}
+			}),
+			boxShadow: Object.assign({}, {
+				soft: 'var(--shadow)'
+			}),
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
   				foreground: 'hsl(var(--secondary-foreground))'
-  			},
-  			muted: {
-  				DEFAULT: 'hsl(var(--muted))',
-  				foreground: 'hsl(var(--muted-foreground))'
   			},
   			accent: {
   				DEFAULT: 'hsl(var(--accent))',
@@ -40,7 +57,6 @@ export default {
   				DEFAULT: 'hsl(var(--destructive))',
   				foreground: 'hsl(var(--destructive-foreground))'
   			},
-  			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
   			chart: {
@@ -50,6 +66,13 @@ export default {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			}
+  		},
+  		boxShadow: {
+  			soft: '0 2px 12px rgba(17,24,39,0.06)',
+  			lift: '0 8px 24px rgba(17,24,39,0.08)'
+  		},
+  		fontFamily: {
+  			primary: ['Heebo', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
   		}
   	}
   },

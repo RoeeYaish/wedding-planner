@@ -1,10 +1,12 @@
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, type FormEvent, useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import { collection, doc, getDocs, serverTimestamp, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
-import { Card, CardContent } from "@/components/ui/Card";
-import SectionHeader from "@/components/ui/section-header";
+import { SectionCard } from "@/components/ui/section-card";
+import { Input, Select, Button } from "@/components/ui/primitives";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { addGuest, deleteGuest, subscribeGuests, updateGuest } from "@/lib/guests";
 import type { Guest } from "@/lib/guests";
 
@@ -23,11 +25,12 @@ function normalizeSeats(x: unknown): number {
   return Number.isFinite(n) && n > 0 ? Math.round(n) : 1;
 }
 
-async function readSheetFile(file: File): Promise<Record<string, any>[]> {
+async function readSheetFile(file: File): Promise<Record<string, unknown>[]> {
   const ab = await file.arrayBuffer();
   const wb = XLSX.read(ab, { type: "array" });
   const ws = wb.Sheets[wb.SheetNames[0]];
-  return XLSX.utils.sheet_to_json(ws, { defval: "" });
+  // XLSX typings are loose; return unknown records and validate later
+  return XLSX.utils.sheet_to_json(ws, { defval: "" }) as Record<string, unknown>[];
 }
 
 function downloadGuestsTemplate() {
@@ -38,16 +41,17 @@ function downloadGuestsTemplate() {
     "עמודה זו ('הנחיות') נועדה להסבר בלבד ואינה מיובאת למערכת.";
 
   const ws = XLSX.utils.aoa_to_sheet([headers, ["", "", "", "", "", "", instructionText]]);
-  (ws as any)["!rtl"] = true;
-  (ws as any)["!freeze"] = { xSplit: 0, ySplit: 1 };
+  // XLSX has loose typings; use unknown casts for the sheet helpers
+  (ws as unknown as Record<string, unknown>)["!rtl"] = true;
+  (ws as unknown as Record<string, unknown>)["!freeze"] = { xSplit: 0, ySplit: 1 };
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "מוזמנים");
   XLSX.writeFile(wb, "wedding-guests-template.xlsx");
 }
 
-function sanitizeForFirestore<T extends Record<string, any>>(obj: T): T {
-  const cleaned: Record<string, any> = {};
+function sanitizeForFirestore<T extends Record<string, unknown>>(obj: T): T {
+  const cleaned: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (value === undefined) continue;
     if (typeof value === "string" && value.trim() === "") continue;
@@ -67,7 +71,7 @@ type GuestImport = {
   rsvpStatus: "pending" | "accepted" | "declined";
 };
 
-function rowsToGuests(rows: Record<string, any>[]) {
+function rowsToGuests(rows: Record<string, unknown>[]) {
   const out: GuestImport[] = [];
   for (const r of rows) {
     const name = String(r["שם"] ?? "").trim();
@@ -179,11 +183,11 @@ export default function GuestListCard() {
   });
 
   const inputClass =
-    "w-full rounded border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-200";
+    "w-full rounded-xl border border-border bg-paper px-4 py-2 text-sm shadow-soft transition-all placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-gold/30 focus:shadow-lift";
   const outlineButton =
-    "inline-flex items-center justify-center rounded border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100";
+    "inline-flex items-center justify-center rounded-xl border border-border bg-paper px-4 py-2 text-sm font-medium text-ink shadow-soft transition-all hover:bg-ivory hover:shadow-lift";
   const primaryButton =
-    "inline-flex items-center justify-center rounded bg-black px-3 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-flex items-center justify-center rounded-xl bg-gold px-4 py-2 text-sm font-medium text-paper shadow-soft transition-all hover:bg-gold/90 hover:shadow-lift disabled:pointer-events-none disabled:opacity-50";
 
   useEffect(() => {
     if (!user) return;
@@ -307,252 +311,226 @@ export default function GuestListCard() {
   };
 
   return (
-    <Card>
-      <CardContent className="space-y-4">
-        <SectionHeader title="Guest List" subtitle="Manage invites & RSVPs" />
-
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="text-sm text-neutral-600">Import mode:</label>
-            <select
-              className="rounded border border-neutral-300 px-2 py-1 text-sm"
-              value={importMode}
-              onChange={onSaveLimitModeChange}
-            >
-              <option value="append">Append</option>
-              <option value="replace">Replace all</option>
-            </select>
-            <label className="cursor-pointer rounded border border-neutral-300 px-3 py-2 text-sm hover:bg-neutral-100">
-              {isImporting ? "Importing..." : "Import CSV/XLSX"}
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                onChange={onChooseFile}
-                className="hidden"
-                disabled={isImporting}
-              />
-            </label>
-          </div>
-          <button type="button" onClick={onDownloadTemplate} className={outlineButton}>
-            Download Excel Template
-          </button>
+    <SectionCard 
+      title="Guest List" 
+      subtitle="Manage your wedding guests" 
+      className="scroll-body"
+      actions={
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted">Import mode:</span>
+          <Select className="rounded-xl border border-border bg-paper px-3 py-1 text-xs" value={importMode} onChange={onSaveLimitModeChange}>
+            <option value="append">Append</option>
+            <option value="replace">Replace all</option>
+          </Select>
+          <label className="cursor-pointer rounded-xl border border-border bg-paper px-3 py-1 text-xs text-ink transition-all hover:bg-ivory">
+            {isImporting ? "Importing..." : "Import CSV/XLSX"}
+            <input type="file" accept=".csv,.xlsx,.xls" onChange={onChooseFile} className="hidden" disabled={isImporting} />
+          </label>
+          <Button className="rounded-xl border border-border bg-paper px-3 py-1 text-xs text-ink" type="button" onClick={onDownloadTemplate}>
+            Download Template
+          </Button>
         </div>
+      }
+    >
 
-        {loading ? (
-          <div className="text-sm text-neutral-500">Loading guests...</div>
-        ) : error ? (
-          <div className="text-sm text-red-600">{error}</div>
-        ) : (
-          <>
-            <div className="grid gap-2 rounded-lg border border-neutral-200 bg-neutral-50 p-3 sm:grid-cols-2 lg:grid-cols-4">
-              <StatBox label="Total guests" value={totals.totalGuests} />
-              <StatBox label="Total seats" value={totals.seats} />
-              <StatBox label="Accepted" value={totals.accepted} />
-              <StatBox label="Declined" value={totals.declined} />
+      {loading ? (
+        <div>
+          {[0, 1, 2].map((index) => (
+            <Skeleton key={index} className="mb-2 h-4 w-full last:mb-0" />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="text-sm text-red-600">{error}</div>
+      ) : (
+        <>
+          <div className="grid gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 sm:grid-cols-2 lg:grid-cols-4">
+            <StatBox label="Total guests" value={totals.totalGuests} />
+            <StatBox label="Total seats" value={totals.seats} />
+            <StatBox label="Accepted" value={totals.accepted} />
+            <StatBox label="Declined" value={totals.declined} />
+          </div>
+
+          <form onSubmit={onAddGuestSubmit} className="grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
+            <Input required className={`${inputClass} sm:col-span-2 lg:col-span-2`} placeholder="Guest name" value={form.name} onChange={handleChange("name")} />
+            <Input className={inputClass} placeholder="Category" value={form.category} onChange={handleChange("category")} />
+            <Input className={inputClass} placeholder="Seats" value={form.seats} onChange={handleChange("seats")} inputMode="numeric" />
+            <Select className={`${inputClass} pr-8`} value={form.status} onChange={handleChange("status")}>
+              <option value="pending">Pending</option>
+              <option value="accepted">Accepted</option>
+              <option value="declined">Declined</option>
+            </Select>
+            <Input className={`${inputClass} sm:col-span-2 lg:col-span-2`} placeholder="Notes" value={form.notes} onChange={handleChange("notes")} />
+            <Button className={`${primaryButton} sm:col-span-2 lg:col-span-1`} type="submit">Add guest</Button>
+          </form>
+
+          {guests.length === 0 ? (
+            <div className="rounded-xl bg-ivory p-8 text-center text-muted" dir="rtl">
+              <div className="text-4xl mb-3">👥</div>
+              <p className="text-sm font-medium mb-1">אין מוזמנים עדיין</p>
+              <p className="text-xs">הוסיפו מוזמן ראשון כדי להתחיל</p>
             </div>
-
-            <form onSubmit={onAddGuestSubmit} className="grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
-              <input
-                required
-                className={`${inputClass} sm:col-span-2 lg:col-span-2`}
-                placeholder="Guest name"
-                value={form.name}
-                onChange={handleChange("name")}
-              />
-              <input
-                className={inputClass}
-                placeholder="Category"
-                value={form.category}
-                onChange={handleChange("category")}
-              />
-              <input
-                className={inputClass}
-                placeholder="Seats"
-                value={form.seats}
-                onChange={handleChange("seats")}
-                inputMode="numeric"
-              />
-              <select
-                className={`${inputClass} pr-8`}
-                value={form.status}
-                onChange={handleChange("status")}
-              >
-                <option value="pending">Pending</option>
-                <option value="accepted">Accepted</option>
-                <option value="declined">Declined</option>
-              </select>
-              <input
-                className={`${inputClass} sm:col-span-2 lg:col-span-2`}
-                placeholder="Notes"
-                value={form.notes}
-                onChange={handleChange("notes")}
-              />
-              <button type="submit" className={`${primaryButton} sm:col-span-2 lg:col-span-1`}>
-                Add guest
-              </button>
-            </form>
-
-            {guests.length === 0 ? (
-              <div className="text-sm text-neutral-500">No guests yet.</div>
-            ) : (
-              <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
-                {guests.map((guest) =>
-                  editingId === guest.id ? (
-                    <div
-                      key={guest.id}
-                      className="rounded-lg border border-neutral-200 bg-white p-3 shadow-sm"
-                    >
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <FieldInput
-                          label="Guest name"
-                          value={editDraft.name}
-                          onChange={(val) => setEditDraft((d) => ({ ...d, name: val }))}
-                          required
-                        />
-                        <FieldInput
-                          label="Category"
-                          value={editDraft.category}
-                          onChange={(val) => setEditDraft((d) => ({ ...d, category: val }))}
-                        />
-                        <FieldInput
-                          label="Seats"
-                          value={editDraft.seats}
-                          onChange={(val) => setEditDraft((d) => ({ ...d, seats: val }))}
-                          inputMode="numeric"
-                        />
-                        <FieldInput
-                          label="Phone"
-                          value={editDraft.phone}
-                          onChange={(val) => setEditDraft((d) => ({ ...d, phone: val }))}
-                        />
-                        <div>
-                          <label className="mb-1 block text-xs text-neutral-500">Status</label>
-                          <select
-                            className={`${inputClass} pr-8`}
-                            value={editDraft.status}
-                            onChange={(e) =>
-                              setEditDraft((d) => ({
-                                ...d,
-                                status: e.target.value as Guest["rsvpStatus"],
-                              }))
-                            }
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="accepted">Accepted</option>
-                            <option value="declined">Declined</option>
-                          </select>
-                        </div>
-                        <FieldInput
-                          label="Notes"
-                          value={editDraft.notes}
-                          onChange={(val) => setEditDraft((d) => ({ ...d, notes: val }))}
-                        />
-                      </div>
-                      <div className="mt-3 flex gap-2">
-                        <button className={primaryButton} onClick={saveEdit}>
-                          Save
-                        </button>
-                        <button className={outlineButton} onClick={cancelEdit}>
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      key={guest.id}
-                      className="space-y-2 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm"
-                    >
-                      <div className="flex flex-col gap-1 text-right">
-                        <div className="text-base font-semibold text-neutral-900">{guest.name}</div>
-                        <div className="text-xs text-neutral-500">
-                          {guest.seats != null ? `Seats: ${guest.seats}` : "Seats: —"}
-                          {guest.category ? ` · Category: ${guest.category}` : ""}
-                        </div>
-                        <div className="text-xs text-neutral-500">
-                          Status: {guest.rsvpStatus}
-                          {guest.statusRaw ? ` (${guest.statusRaw})` : ""}
-                        </div>
-                        {guest.notes ? (
-                          <div className="text-xs text-neutral-500">Notes: {guest.notes}</div>
-                        ) : null}
-                        {guest.phone ? (
-                          <div className="text-xs text-neutral-500">Phone: {guest.phone}</div>
-                        ) : null}
-                      </div>
-                      <div className="flex flex-wrap gap-2 text-sm">
+          ) : (
+            <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+              {guests.map((guest) =>
+                editingId === guest.id ? (
+                  <div
+                    key={guest.id}
+                    className="rounded-xl border border-border bg-paper p-4 shadow-soft"
+                  >
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <FieldInput
+                        label="Guest name"
+                        value={editDraft.name}
+                        onChange={(val) => setEditDraft((d) => ({ ...d, name: val }))}
+                        required
+                      />
+                      <FieldInput
+                        label="Category"
+                        value={editDraft.category}
+                        onChange={(val) => setEditDraft((d) => ({ ...d, category: val }))}
+                      />
+                      <FieldInput
+                        label="Seats"
+                        value={editDraft.seats}
+                        onChange={(val) => setEditDraft((d) => ({ ...d, seats: val }))}
+                        inputMode="numeric"
+                      />
+                      <FieldInput
+                        label="Phone"
+                        value={editDraft.phone}
+                        onChange={(val) => setEditDraft((d) => ({ ...d, phone: val }))}
+                      />
+                      <div>
+                        <label className="mb-1 block text-xs text-gray-500">Status</label>
                         <select
-                          className={`${inputClass} w-auto pr-8`}
-                          value={guest.rsvpStatus}
+                          className={`${inputClass} pr-8`}
+                          value={editDraft.status}
                           onChange={(e) =>
-                            onStatusChange(guest, e.target.value as Guest["rsvpStatus"])
+                            setEditDraft((d) => ({
+                              ...d,
+                              status: e.target.value as Guest["rsvpStatus"],
+                            }))
                           }
                         >
                           <option value="pending">Pending</option>
                           <option value="accepted">Accepted</option>
                           <option value="declined">Declined</option>
                         </select>
-                        <button className={outlineButton} onClick={() => startEdit(guest)}>
-                          Edit
-                        </button>
-                        <button
-                          className={`${outlineButton} border-red-200 text-red-600 hover:bg-red-50`}
-                          onClick={() => onDeleteGuest(guest)}
-                        >
-                          Delete
-                        </button>
                       </div>
+                      <FieldInput
+                        label="Notes"
+                        value={editDraft.notes}
+                        onChange={(val) => setEditDraft((d) => ({ ...d, notes: val }))}
+                      />
                     </div>
-                  )
-                )}
-              </div>
-            )}
-
-            <div className="mt-4 overflow-x-auto" dir="rtl">
-              <table className="min-w-full rounded border border-neutral-200 text-right">
-                <thead className="bg-neutral-50 text-sm text-neutral-700">
-                  <tr>
-                    <th className="border-b border-neutral-200 px-3 py-2">שם</th>
-                    <th className="border-b border-neutral-200 px-3 py-2">קטגוריה</th>
-                    <th className="border-b border-neutral-200 px-3 py-2">מס' מוזמנים</th>
-                    <th className="border-b border-neutral-200 px-3 py-2">מספר טלפון</th>
-                    <th className="border-b border-neutral-200 px-3 py-2">סטטוס</th>
-                    <th className="border-b border-neutral-200 px-3 py-2">הערות</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {guests.length > 0 ? (
-                    guests.map((g) => (
-                      <tr key={g.id} className="odd:bg-white even:bg-neutral-50 text-sm text-neutral-700">
-                        <td className="border-b border-neutral-100 px-3 py-2">{g.name}</td>
-                        <td className="border-b border-neutral-100 px-3 py-2">{g.category ?? ""}</td>
-                        <td className="border-b border-neutral-100 px-3 py-2">{g.seats ?? ""}</td>
-                        <td className="border-b border-neutral-100 px-3 py-2">{g.phone ?? ""}</td>
-                        <td className="border-b border-neutral-100 px-3 py-2">{g.rsvpStatus}</td>
-                        <td className="border-b border-neutral-100 px-3 py-2">{g.notes ?? ""}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td className="px-3 py-4 text-neutral-500" colSpan={6}>
-                        אין מוזמנים להצגה כרגע.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button className={primaryButton} onClick={saveEdit}>
+                        Save
+                      </button>
+                      <button className={outlineButton} onClick={cancelEdit}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div key={guest.id} className="rounded-xl border border-border bg-paper p-4 shadow-soft">
+                    <div className="text-right">
+                      <div className="text-base font-semibold text-gray-900">{guest.name}</div>
+                      <div className="mt-2 space-y-2 text-sm text-gray-600">
+                        <div className="border-t border-gray-100 pt-2 first:border-none first:pt-0">
+                          Seats: {guest.seats != null ? guest.seats : "-"}
+                          {guest.category ? ` - Category: ${guest.category}` : ""}
+                        </div>
+                        <div className="border-t border-gray-100 pt-2 first:border-none first:pt-0">
+                          Status: {guest.rsvpStatus}
+                          {guest.statusRaw ? ` (${guest.statusRaw})` : ""}
+                        </div>
+                        {guest.notes ? (
+                          <div className="border-t border-gray-100 pt-2 first:border-none first:pt-0">
+                            Notes: {guest.notes}
+                          </div>
+                        ) : null}
+                        {guest.phone ? (
+                          <div className="border-t border-gray-100 pt-2 first:border-none first:pt-0">
+                            Phone: {guest.phone}
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>                      <div className="flex flex-wrap gap-2 text-sm">
+                      <select
+                        className={`${inputClass} w-auto pr-8`}
+                        value={guest.rsvpStatus}
+                        onChange={(e) =>
+                          onStatusChange(guest, e.target.value as Guest["rsvpStatus"])
+                        }
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="declined">Declined</option>
+                      </select>
+                      <button className={outlineButton} onClick={() => startEdit(guest)}>
+                        Edit
+                      </button>
+                      <button
+                        className={`${outlineButton} border-red-200 text-red-600 hover:bg-red-50`}
+                        onClick={() => onDeleteGuest(guest)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )
+              )}
             </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+          )}
+
+          <div className="mt-4 overflow-x-auto rounded-xl border border-border shadow-soft" dir="rtl">
+            <table className="min-w-full">
+              <thead className="sticky top-0 bg-paper text-xs font-medium text-ink">
+                <tr>
+                  <th className="border-b border-border px-3 py-2 text-right">שם</th>
+                  <th className="border-b border-border px-3 py-2 text-right">קטגוריה</th>
+                  <th className="border-b border-border px-3 py-2 text-right">מס' מוזמנים</th>
+                  <th className="border-b border-border px-3 py-2 text-right">מספר טלפון</th>
+                  <th className="border-b border-border px-3 py-2 text-right">סטטוס</th>
+                  <th className="border-b border-border px-3 py-2 text-right">הערות</th>
+                </tr>
+              </thead>
+              <tbody>
+                {guests.length > 0 ? (
+                  guests.map((g, index) => (
+                    <tr key={g.id} className={`text-sm transition-all hover:bg-ivory ${index % 2 === 0 ? 'bg-paper' : 'bg-ivory'}`}>
+                      <td className="border-b border-border px-3 py-2 text-ink font-medium truncate max-w-0" title={g.name}>{g.name}</td>
+                      <td className="border-b border-border px-3 py-2 text-muted truncate max-w-0" title={g.category ?? ""}>{g.category ?? ""}</td>
+                      <td className="border-b border-border px-3 py-2 text-ink text-center">{g.seats ?? ""}</td>
+                      <td className="border-b border-border px-3 py-2 text-muted">{g.phone ?? ""}</td>
+                      <td className="border-b border-border px-3 py-2">
+                        <StatusBadge status={g.rsvpStatus} />
+                      </td>
+                      <td className="border-b border-border px-3 py-2 text-muted truncate max-w-0" title={g.notes ?? ""}>{g.notes ?? ""}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td className="px-3 py-6 text-muted text-center" colSpan={6}>
+                      אין מוזמנים להצגה כרגע.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </SectionCard>
   );
 }
 
 function StatBox({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded border border-neutral-200 bg-white px-3 py-2 text-right">
-      <div className="text-xs text-neutral-500 uppercase tracking-wide">{label}</div>
-      <div className="text-lg font-semibold text-neutral-900">{value}</div>
+    <div className="rounded border border-gray-200 bg-white px-3 py-2 text-right">
+      <div className="text-xs text-gray-500 uppercase tracking-wide">{label}</div>
+      <div className="text-lg font-semibold text-gray-900">{value}</div>
     </div>
   );
 }
@@ -572,9 +550,9 @@ function FieldInput({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-neutral-500">{label}</label>
+      <label className="mb-1 block text-xs text-gray-500">{label}</label>
       <input
-        className="w-full rounded border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-200"
+        className="w-full rounded border border-gray-300 px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         inputMode={inputMode}
@@ -582,4 +560,14 @@ function FieldInput({
       />
     </div>
   );
+}
+
+function StatusBadge({ status }: { status: "pending" | "accepted" | "declined" }) {
+  const map = {
+    pending: { label: "Pending", variant: "outline" as const },
+    accepted: { label: "Attending", variant: "default" as const },
+    declined: { label: "Declined", variant: "destructive" as const },
+  }[status];
+
+  return <Badge variant={map.variant}>{map.label}</Badge>;
 }

@@ -15,7 +15,7 @@ export type Todo = {
   id: string;
   text: string;
   completed: boolean;
-  createdAt?: any; // Firestore Timestamp (optional)
+  createdAt?: unknown; // Firestore Timestamp (optional)
 };
 
 function todosColRef(uid: string) {

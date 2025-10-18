@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { SectionCard } from "@/components/ui/section-card";
+import { Input, Button } from "@/components/ui/primitives";
+import { Skeleton } from "@/components/ui/skeleton";
+
 import {
   addTimelineEvent,
   deleteTimelineEvent,
@@ -7,8 +11,6 @@ import {
   updateTimelineEvent,
   type TimelineEvent,
 } from "@/lib/timeline";
-import { Card, CardContent } from "@/components/ui/Card";
-import SectionHeader from "@/components/ui/section-header";
 
 type Draft = {
   title: string;
@@ -29,24 +31,33 @@ const emptyDraft: Draft = {
 };
 
 const inputClass =
-  "w-full rounded border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-200";
+  "w-full rounded-xl border border-border bg-paper px-4 py-2 text-sm shadow-soft transition-all placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-gold/30 focus:shadow-lift";
 const outlineButton =
-  "inline-flex items-center justify-center rounded border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100";
+  "inline-flex items-center justify-center rounded-xl border border-border bg-paper px-4 py-2 text-sm font-medium text-ink shadow-soft transition-all hover:bg-ivory hover:shadow-lift";
 const primaryButton =
-  "inline-flex items-center justify-center rounded bg-black px-3 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center rounded-xl bg-gold px-4 py-2 text-sm font-medium text-paper shadow-soft transition-all hover:bg-gold/90 hover:shadow-lift disabled:pointer-events-none disabled:opacity-50";
 
 export default function TimelineCard() {
   const { user } = useAuth();
   const uid = user?.uid ?? "";
   const [items, setItems] = useState<TimelineEvent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState<Draft>({ ...emptyDraft });
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Draft>({ ...emptyDraft });
 
   useEffect(() => {
-    if (!uid) return;
-    return subscribeTimeline(uid, setItems);
+    if (!uid) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    return subscribeTimeline(uid, (events) => {
+      setItems(events);
+      setLoading(false);
+    });
   }, [uid]);
 
   const canAdd = useMemo(() => {
@@ -119,66 +130,83 @@ export default function TimelineCard() {
   }
 
   return (
-    <Card dir="rtl">
-      <CardContent className="space-y-4">
-        <SectionHeader title="Wedding Day Timeline" subtitle="Schedule your big day" />
-
-        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <FieldInput
-              label="כותרת (חובה)"
-              value={draft.title}
-              onChange={(value) => setDraft((d) => ({ ...d, title: value }))}
-              required
-            />
-            <FieldInput
-              label="שעה (HH:mm)"
-              value={draft.time}
-              onChange={(value) => setDraft((d) => ({ ...d, time: value }))}
-              placeholder="14:30"
-            />
-            <FieldInput
-              label="משך (דקות)"
-              value={draft.durationMinutes ?? ""}
-              onChange={(value) => setDraft((d) => ({ ...d, durationMinutes: value }))}
-              inputMode="numeric"
-            />
-            <FieldInput
-              label="מיקום"
-              value={draft.location ?? ""}
-              onChange={(value) => setDraft((d) => ({ ...d, location: value }))}
-            />
-            <FieldInput
-              label="איש קשר"
-              value={draft.contact ?? ""}
-              onChange={(value) => setDraft((d) => ({ ...d, contact: value }))}
-            />
-            <FieldInput
-              label="הערות"
-              value={draft.notes ?? ""}
-              onChange={(value) => setDraft((d) => ({ ...d, notes: value }))}
-            />
-          </div>
-          <div className="mt-3 flex justify-end">
-            <button className={primaryButton} onClick={onAdd} disabled={!canAdd || saving}>
-              הוסף אירוע
-            </button>
-          </div>
+    <SectionCard title="Wedding Day Timeline" subtitle="Schedule your big day" className="scroll-body">
+  <div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <FieldInput
+            label="כותרת אירוע"
+            value={draft.title}
+            onChange={(value) => setDraft((d) => ({ ...d, title: value }))}
+            required
+          />
+          <FieldInput
+            label="שעה (HH:mm)"
+            value={draft.time}
+            onChange={(value) => setDraft((d) => ({ ...d, time: value }))}
+            placeholder="18:30"
+          />
+          <FieldInput
+            label="משך (בדקות)"
+            value={draft.durationMinutes ?? ""}
+            onChange={(value) => setDraft((d) => ({ ...d, durationMinutes: value }))}
+            inputMode="numeric"
+          />
+          <FieldInput
+            label="מיקום"
+            value={draft.location ?? ""}
+            onChange={(value) => setDraft((d) => ({ ...d, location: value }))}
+          />
+          <FieldInput
+            label="איש קשר"
+            value={draft.contact ?? ""}
+            onChange={(value) => setDraft((d) => ({ ...d, contact: value }))}
+          />
+          <FieldInput
+            label="הערות"
+            value={draft.notes ?? ""}
+            onChange={(value) => setDraft((d) => ({ ...d, notes: value }))}
+          />
         </div>
+        <div className="mt-3 flex justify-end">
+          <Button className={primaryButton} onClick={onAdd} disabled={!canAdd || saving}>
+            הוסיפו אירוע
+          </Button>
+        </div>
+      </div>
 
-        {items.length === 0 ? (
-          <div className="text-sm text-neutral-500">אין אירועים עדיין.</div>
-        ) : (
-          <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
-            {items.map((event) =>
-              editingId === event.id ? (
+      {loading ? (
+        <>
+          <Skeleton className="mb-2 h-4 w-full" />
+          <Skeleton className="mb-2 h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+        </>
+      ) : items.length === 0 ? (
+        <div className="rounded-xl bg-ivory p-8 text-center text-muted" dir="rtl">
+          <div className="text-4xl mb-3">📅</div>
+          <p className="text-sm font-medium mb-1">אין אירועים עדיין</p>
+          <p className="text-xs">הוסיפו אירוע ראשון ללו"ז החתונה</p>
+        </div>
+      ) : (
+        <div className="max-h-[420px] overflow-y-auto pr-1 relative">
+          <div className="absolute right-6 top-0 bottom-0 w-px bg-border"></div>
+          {items.map((event) => {
+            const details = timelineDetails(event);
+
+            if (editingId === event.id) {
+              return (
                 <div
                   key={event.id}
-                  className="rounded-lg border border-neutral-200 bg-white p-3 shadow-sm"
+                  className="relative flex items-start gap-4 pr-4"
                 >
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <div className="flex flex-col items-center">
+                    <div className="rounded-full bg-gold px-3 py-1 text-xs font-medium text-paper shadow-soft">
+                      {editDraft.time}
+                    </div>
+                  </div>
+                  <div className="flex-1 rounded-xl border border-border bg-paper p-4 shadow-soft">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                     <FieldInput
-                      label="כותרת (חובה)"
+                      label="כותרת אירוע"
                       value={editDraft.title}
                       onChange={(value) => setEditDraft((d) => ({ ...d, title: value }))}
                       required
@@ -189,9 +217,11 @@ export default function TimelineCard() {
                       onChange={(value) => setEditDraft((d) => ({ ...d, time: value }))}
                     />
                     <FieldInput
-                      label="משך (דקות)"
+                      label="משך (בדקות)"
                       value={editDraft.durationMinutes ?? ""}
-                      onChange={(value) => setEditDraft((d) => ({ ...d, durationMinutes: value }))}
+                      onChange={(value) =>
+                        setEditDraft((d) => ({ ...d, durationMinutes: value }))
+                      }
                       inputMode="numeric"
                     />
                     <FieldInput
@@ -210,64 +240,86 @@ export default function TimelineCard() {
                       onChange={(value) => setEditDraft((d) => ({ ...d, notes: value }))}
                     />
                   </div>
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      className={primaryButton}
-                      onClick={saveEdit}
-                      disabled={
-                        saving ||
-                        editDraft.title.trim() === "" ||
-                        !/^\d{2}:\d{2}$/.test(editDraft.time ?? "")
-                      }
-                    >
-                      שמור
-                    </button>
-                    <button className={outlineButton} onClick={cancelEdit}>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button className={primaryButton} onClick={saveEdit} disabled={saving || editDraft.title.trim() === "" || !/^\d{2}:\d{2}$/.test(editDraft.time ?? "") }>
+                      עדכון
+                    </Button>
+                    <Button className={outlineButton} onClick={cancelEdit}>
                       ביטול
-                    </button>
+                    </Button>
+                  </div>
                   </div>
                 </div>
-              ) : (
-                <div
-                  key={event.id}
-                  className="space-y-2 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm"
-                >
-                  <div className="text-base font-semibold text-neutral-900">
-                    {event.time} · {event.title}
-                  </div>
-                  <div className="text-sm text-neutral-600">
-                    {event.durationMinutes != null ? `משך: ${event.durationMinutes} דק'` : ""}
-                    {event.durationMinutes != null && event.location ? " · " : ""}
-                    {event.location ? `מיקום: ${event.location}` : ""}
-                    {event.location && event.contact ? " · " : ""}
-                    {event.contact ? `איש קשר: ${event.contact}` : ""}
-                  </div>
-                  {event.notes ? (
-                    <div className="text-sm text-neutral-500">הערות: {event.notes}</div>
-                  ) : null}
-                  <div className="mt-2 flex gap-2 text-sm">
-                    <button className={outlineButton} onClick={() => startEdit(event)}>
-                      ערוך
-                    </button>
-                    <button
-                      className={`${outlineButton} border-red-200 text-red-600 hover:bg-red-50`}
-                      onClick={() => onDelete(event.id)}
-                    >
-                      מחק
-                    </button>
+              );
+            }
+
+            return (
+              <div
+                key={event.id}
+                className="relative flex items-start gap-4 pr-4"
+              >
+                <div className="flex flex-col items-center">
+                  <div className="rounded-full bg-gold px-3 py-1 text-xs font-medium text-paper shadow-soft">
+                    {event.time}
                   </div>
                 </div>
-              )
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                <div className="flex-1 rounded-xl border border-border bg-paper p-4 shadow-soft transition-all hover:bg-ivory hover:shadow-lift">
+                  <div className="text-right">
+                    <div className="text-base font-bold text-ink">
+                      {event.title}
+                    </div>
+                    {details.length > 0 ? (
+                      <div className="mt-2 space-y-2 text-sm text-muted">
+                        {details.map((detail, idx) => (
+                          <div
+                            key={idx}
+                            className="border-t border-border pt-2 first:border-none first:pt-0"
+                          >
+                            {detail}
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="mt-3 flex flex-wrap justify-end gap-2 text-sm">
+                    <Button className={outlineButton} onClick={() => startEdit(event)}>
+                      Edit
+                    </Button>
+                    <Button className={`${outlineButton} border-red-200 text-red-600 hover:bg-red-50`} onClick={() => onDelete(event.id)}>
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </SectionCard>
   );
 }
 
+function timelineDetails(event: TimelineEvent) {
+  const details: string[] = [];
+  if (event.durationMinutes != null) {
+    details.push(`Duration: ${event.durationMinutes} min`);
+  }
+  if (event.location) {
+    details.push(`Location: ${event.location}`);
+  }
+  if (event.contact) {
+    details.push(`Contact: ${event.contact}`);
+  }
+  if (event.notes) {
+    details.push(`Notes: ${event.notes}`);
+  }
+  return details;
+}
+
 function normalizeStr(value?: string | null) {
-  if (value == null) return null;
+  if (value == null) {
+    return null;
+  }
   const trimmed = value.trim();
   return trimmed === "" ? null : trimmed;
 }
@@ -295,8 +347,8 @@ function FieldInput({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-neutral-500">{label}</label>
-      <input
+      <label className="mb-1 block text-xs text-muted">{label}</label>
+      <Input
         className={inputClass}
         value={value}
         onChange={(e) => onChange(e.target.value)}

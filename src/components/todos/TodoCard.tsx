@@ -1,15 +1,16 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
-import { Card, CardContent } from "@/components/ui/Card";
-import SectionHeader from "@/components/ui/section-header";
+import { SectionCard } from "@/components/ui/section-card";
+import { Input, Button } from "@/components/ui/primitives";
 import { addTodo, deleteTodo, subscribeToTodos, toggleTodo } from "@/lib/todos";
 import type { Todo } from "@/lib/todos";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const inputClass =
-  "flex-1 rounded border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-200";
+  "flex-1 rounded-xl border border-border bg-paper px-4 py-2 text-sm shadow-soft transition-all placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-gold/30 focus:shadow-lift";
 const buttonClass =
-  "inline-flex items-center justify-center rounded bg-black px-3 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center rounded-xl bg-gold px-4 py-2 text-sm font-medium text-paper shadow-soft transition-all hover:bg-gold/90 hover:shadow-lift disabled:pointer-events-none disabled:opacity-50";
 
 export default function TodoCard() {
   const { user } = useAuth();
@@ -65,51 +66,51 @@ export default function TodoCard() {
   }, [location.hash]);
 
   return (
-    <Card>
-      <CardContent className="space-y-4" id="todos">
-        <SectionHeader title="To-Do List" subtitle="Track your tasks" />
-        <form onSubmit={onAdd} className="flex flex-col gap-2 sm:flex-row">
-          <input
-            ref={inputRef}
-            className={inputClass}
-            placeholder="Add a task..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-          <button className={buttonClass} type="submit" disabled={!input.trim()}>
-            Add Task
-          </button>
-        </form>
+    <SectionCard title="To-Do List" subtitle="Track your tasks" className="scroll-body">
+      <form onSubmit={onAdd} className="flex gap-2">
+        <Input
+          ref={inputRef}
+          className={inputClass}
+          placeholder="Add a task..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <Button className={buttonClass} type="submit" disabled={!input.trim()}>
+          Add Task
+        </Button>
+      </form>
 
-        {loading ? (
-          <SkeletonList />
-        ) : errMsg ? (
-          <div className="text-sm text-red-600">{errMsg}</div>
-        ) : todos.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-3 py-4 text-sm text-neutral-500">
-            No tasks yet. Add your first task to get started.
-          </div>
-        ) : (
-          <ul className="space-y-2">
+      {loading ? (
+        <div>
+          {[0, 1, 2].map((index) => (
+            <Skeleton key={index} className="mb-2 h-4 w-full last:mb-0" />
+          ))}
+        </div>
+      ) : errMsg ? (
+        <div className="text-sm text-red-600">{errMsg}</div>
+      ) : todos.length === 0 ? (
+        <div className="rounded-xl bg-ivory p-8 text-center text-muted" dir="rtl">
+          <div className="text-4xl mb-3">📝</div>
+          <p className="text-sm font-medium mb-1">אין משימות עדיין</p>
+          <p className="text-xs">הוסיפו משימה ראשונה כדי להתחיל</p>
+        </div>
+      ) : (
+        <div className="max-h-[420px] overflow-y-auto pr-1">
+          <ul className="space-y-3">
             {todos.map((t) => (
-              <li
-                key={t.id}
-                className="flex items-center justify-between rounded border border-neutral-200 px-3 py-2"
-              >
-                <label className="flex items-center gap-2 text-sm">
+              <li key={t.id} className="group flex items-center justify-between rounded-xl bg-paper p-4 transition-all">
+                <label className="flex items-center gap-3 text-sm text-ink cursor-pointer">
                   <input
                     type="checkbox"
-                    className="h-4 w-4 accent-black"
+                    className="h-4 w-4 accent-gold cursor-pointer"
                     checked={t.completed}
                     onChange={() => onToggle(t)}
                   />
-                  <span className={t.completed ? "line-through text-neutral-400" : ""}>
-                    {t.text}
-                  </span>
+                  <span className={t.completed ? "line-through text-muted" : ""}>{t.text}</span>
                 </label>
                 <button
                   type="button"
-                  className="text-sm text-red-600 hover:text-red-700"
+                  className="text-sm text-red-600 transition hover:text-red-700 opacity-0 group-hover:opacity-100"
                   onClick={() => onDelete(t)}
                 >
                   Delete
@@ -117,18 +118,8 @@ export default function TodoCard() {
               </li>
             ))}
           </ul>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function SkeletonList() {
-  return (
-    <div className="space-y-2">
-      {Array.from({ length: 3 }).map((_, idx) => (
-        <div key={idx} className="h-10 rounded-lg bg-neutral-200/70 animate-pulse" />
-      ))}
-    </div>
+        </div>
+      )}
+    </SectionCard>
   );
 }

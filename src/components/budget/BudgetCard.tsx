@@ -1,14 +1,14 @@
-import { useEffect, useMemo, useState, FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
 import type { BudgetDoc, Expense } from "@/lib/budget";
 import { addExpense, deleteExpense, setBudgetLimit, subscribeBudget, subscribeExpenses } from "@/lib/budget";
-import { Card, CardContent } from "@/components/ui/Card";
-import SectionHeader from "@/components/ui/section-header";
+import { SectionCard } from "@/components/ui/section-card";
+import { Input, Button } from "@/components/ui/primitives";
 
 const inputClass =
-  "w-full rounded border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-200";
+  "w-full rounded-xl border border-border bg-paper px-4 py-2 text-sm shadow-soft transition-all placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-gold/30 focus:shadow-lift";
 const buttonClass =
-  "inline-flex items-center justify-center rounded bg-black px-3 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center rounded-xl bg-gold px-4 py-2 text-sm font-medium text-paper shadow-soft transition-all hover:bg-gold/90 hover:shadow-lift disabled:pointer-events-none disabled:opacity-50";
 
 export default function BudgetCard() {
   const { user } = useAuth();
@@ -65,101 +65,71 @@ export default function BudgetCard() {
   };
 
   return (
-    <Card>
-      <CardContent className="space-y-4">
-        <SectionHeader
-          title="Budget Tracker"
-          subtitle="Track your expenses vs. your limit"
-        />
-
-        <form onSubmit={onSaveLimit} className="flex flex-col gap-2 md:flex-row md:items-end">
-          <div className="flex-1">
-            <label className="mb-1 block text-xs text-neutral-500">Budget limit</label>
-            <input
-              className={inputClass}
-              placeholder="e.g. 25000"
-              value={limitInput}
-              onChange={(e) => setLimitInput(e.target.value)}
-              inputMode="numeric"
-            />
-          </div>
-          <div className="md:w-28">
-            <label className="mb-1 block text-xs text-neutral-500">Currency</label>
-            <input
-              className={inputClass}
-              placeholder="USD"
-              value={currencyInput}
-              onChange={(e) => setCurrencyInput(e.target.value.toUpperCase())}
-            />
-          </div>
-          <button type="submit" className={buttonClass}>
-            Save
-          </button>
-        </form>
-
-        <div className="rounded border border-neutral-200 bg-neutral-50 p-3">
-          <div className="mb-2 flex items-center justify-between text-sm">
-            <span>Spent</span>
-            <span className="font-medium">
-              {formatMoney(totalSpent, budget?.currency)} /{" "}
-              {formatMoney(budget?.limit ?? 0, budget?.currency)}
-            </span>
-          </div>
-          <div className="h-2 w-full rounded bg-neutral-200">
-            <div
-              className={`h-full rounded ${progress >= 100 ? "bg-red-500" : "bg-green-500"}`}
-              style={{ width: `${progress}%` }}
-            />
+    <SectionCard title="Budget Tracker" subtitle="Monitor your wedding expenses">
+      <form onSubmit={onSaveLimit} className="flex flex-col gap-2 md:flex-row md:items-end">
+        <div className="flex-1">
+          <label className="mb-1 block text-xs text-muted">Budget limit</label>
+          <div className="flex gap-2 rounded-xl bg-ivory p-4">
+            <Input className={`${inputClass} border-0 bg-transparent shadow-none focus:ring-0`} placeholder="e.g. 25000" value={limitInput} onChange={(e) => setLimitInput(e.target.value)} inputMode="numeric" />
+            <Input className={`${inputClass} border-0 bg-transparent shadow-none focus:ring-0 md:w-20`} placeholder="USD" value={currencyInput} onChange={(e) => setCurrencyInput(e.target.value.toUpperCase())} />
           </div>
         </div>
+        <Button type="submit" className={buttonClass}>Save</Button>
+      </form>
 
-        <form onSubmit={onAddExpense} className="flex flex-col gap-2 sm:flex-row">
-          <input
-            className={inputClass}
-            placeholder="Expense name..."
-            value={expName}
-            onChange={(e) => setExpName(e.target.value)}
+      <div className="rounded-xl border border-border bg-paper p-6 shadow-soft">
+        <div className="mb-3 flex items-center justify-between text-sm">
+          <span className="text-muted">Spent</span>
+          <span className="font-medium text-ink">
+            {formatMoney(totalSpent, budget?.currency)} /{" "}
+            {formatMoney(budget?.limit ?? 0, budget?.currency)}
+          </span>
+        </div>
+        <div className="h-1 w-full rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-gold transition-all duration-300"
+            style={{ width: `${progress}%` }}
           />
-          <input
-            className={inputClass}
-            placeholder="Amount"
-            value={expAmount}
-            onChange={(e) => setExpAmount(e.target.value)}
-            inputMode="decimal"
-          />
-          <button className={buttonClass} type="submit">
-            Add
-          </button>
-        </form>
+        </div>
+      </div>
 
-        {expenses.length === 0 ? (
-          <div className="text-sm text-neutral-500">No expenses yet.</div>
-        ) : (
-          <ul className="space-y-2">
-            {expenses.slice(0, 5).map((e) => (
-              <li
-                key={e.id}
-                className="flex items-center justify-between rounded border border-neutral-200 px-3 py-2"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="font-medium text-neutral-900">{e.name}</span>
-                  <span className="text-sm text-neutral-600">
-                    {formatMoney(e.amount, budget?.currency)}
-                  </span>
-                </div>
+      <form onSubmit={onAddExpense} className="flex gap-2">
+        <Input className={inputClass} placeholder="Expense name..." value={expName} onChange={(e) => setExpName(e.target.value)} />
+        <Input className={inputClass} placeholder="Amount" value={expAmount} onChange={(e) => setExpAmount(e.target.value)} inputMode="decimal" />
+        <Button className={buttonClass} type="submit">Add</Button>
+      </form>
+
+      {expenses.length === 0 ? (
+        <div className="rounded-xl bg-ivory p-8 text-center text-muted">
+          <div className="text-4xl mb-3">💰</div>
+          <p className="text-sm font-medium mb-1">No expenses yet</p>
+          <p className="text-xs">Add your first expense to start tracking</p>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {expenses.slice(0, 5).map((e) => (
+            <li
+              key={e.id}
+              className="flex items-center justify-between rounded-xl border border-border bg-paper p-4 shadow-soft transition-all hover:bg-ivory hover:shadow-lift"
+            >
+              <span className="font-medium text-ink">{e.name}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted">
+                  {formatMoney(e.amount, budget?.currency)}
+                </span>
                 <button
                   type="button"
-                  className="text-sm text-red-600 hover:text-red-700"
+                  className="text-sm text-red-600 transition hover:text-red-700"
                   onClick={() => user && deleteExpense(user.uid, e.id)}
                 >
                   Delete
                 </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </SectionCard>
   );
 }
 
